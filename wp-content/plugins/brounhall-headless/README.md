@@ -132,6 +132,12 @@ BH-050 registers two plugin-owned footer locations because the current footer ha
 
 BH-051 defines one source-proven semantic layout key for future top-level primary-menu configuration: `mixed` — editor label **Columns with Featured Content**. It represents the current Fertility Treatments mega-menu: grouped treatment links arranged in columns plus a featured treatment image/link panel. No CSS, breakpoint, color, spacing, animation, or column-count values are part of the contract. Why Bourn Hall, Our Specialists, and Costs are ordinary hierarchical dropdowns and do not need an enum value; Fertility Treatments is the only current mega-menu. The helper `brounhall_get_mega_menu_layouts()` is the canonical vocabulary and `brounhall_is_mega_menu_layout()` is available for future validation. BH-052 will add the selector and top-level fields, BH-053 will add group/child fields, and frontend rendering remains a later integration concern.
 
+## Top-level mega-menu fields
+
+BH-052 attaches the BrounHall Mega Menu ACF Free field group to nav_menu_item and exposes it through WPGraphQL for ACF as MenuItem.megaMenu. The group provides enable_mega_menu (enableMegaMenu, default false), mega_menu_layout (megaMenuLayout, conditional on enable and sourced only from brounhall_get_mega_menu_layouts()), and the source-proven featured-panel fields featured_image, featured_label, and featured_link. WPGraphQL currently returns the select value as a one-element list, for example ["mixed"]; this is the runtime schema shape to map later.
+
+The group is conditionally intended for top-level items assigned to primary-navigation; ACF's menu-item location rule cannot identify menu location/depth precisely, so server-side sanitization rejects non-primary or nested menu-item values. Feature-panel copy is plain text, images use Media Library attachment IDs, and links reuse the existing controlled link sanitization. Column count, descriptions, dividers, view-all controls, and child/group fields are not implemented: BH-053 owns child/group configuration, BH-054 owns broader URL hardening, and BH-055 owns representative configuration. No final mega-menu content is seeded here.
+
 ## Local development
 
 - WordPress: http://brounhall-wp.local/

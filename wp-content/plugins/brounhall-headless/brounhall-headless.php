@@ -21,6 +21,7 @@ foreach ( array(
 	'graphql.php',
 	'settings.php',
 	'navigation.php',
+	'mega-menu.php',
 	'seo.php',
 	'sections/hero.php',
 	'sections/rich-text.php',
