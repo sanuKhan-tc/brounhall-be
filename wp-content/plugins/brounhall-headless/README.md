@@ -56,6 +56,10 @@ The image fields reuse the BH-019 Media Library attachment-ID contract. Future C
 
 The `BrounHall Hero` ACF Free field group is attached to native Pages and exposed through WPGraphQL for ACF as `hero`. It provides optional eyebrow, title, subtitle, description, Hero image, primary CTA, and secondary CTA fields. Images reuse the BH-019 Media Library attachment-ID contract and links reuse the BH-019 Link contract. The current frontend Hero uses additional presentation-specific composition and repeated trust avatars; those are not modeled here because WordPress does not own presentation and ACF Free has no repeater. Frontend consumption and the `HeroFields` fragment are deferred to later frontend/page-section tasks.
 
+## Rich Text fields
+
+The `BrounHall Rich Text` ACF Free field group is attached to native Pages and exposed through WPGraphQL for ACF as `richText`. It provides an optional plain-text title and a plain-text body textarea; blank lines separate paragraphs. Stored HTML, scripts, events, styles, embeds, and arbitrary markup are not accepted because the current frontend renders content as plain text. Frontend consumption and the page-section GraphQL fragment are deferred to BH-058; other section types remain deferred to BH-023+.
+
 ## Intentionally not implemented
 
 This release does not include custom post types, taxonomies, ACF field groups, GraphQL fields or persisted queries, navigation logic, SEO settings, preview, revalidation, forms, redirects, or frontend integration.
