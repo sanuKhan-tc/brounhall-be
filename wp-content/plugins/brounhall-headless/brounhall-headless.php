@@ -20,6 +20,7 @@ foreach ( array(
 	'settings.php',
 	'navigation.php',
 	'seo.php',
+	'sections/hero.php',
 	'preview.php',
 	'revalidation.php',
 	'security.php',
