@@ -22,6 +22,7 @@ foreach ( array(
 	'seo.php',
 	'sections/hero.php',
 	'sections/rich-text.php',
+	'sections/text-image.php',
 	'preview.php',
 	'revalidation.php',
 	'security.php',
