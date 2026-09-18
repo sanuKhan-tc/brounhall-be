@@ -44,6 +44,10 @@ Media and reusable link fields are deferred to BH-019. SEO fields are deferred t
 
 BH-029 is a global-backed Statistics contract: the existing `brounhall_global_settings` option owns the semantic `success_rate`, `live_births`, and `years_of_trusted_care` display values, exposed through the public `brounhallGlobalSettings` GraphQL object. Labels remain frontend-owned (`Success Rates`, `Live Births`, and `Years of Trusted Care`), as do StatsRow count-up animation and presentation. No Page-level metric fields or repeated metric structure is created. The homepage and About static values currently conflict; final production figures require a content-owner decision. BH-059 will own the typed `GetGlobalSettings` operation, and the existing frontend remains unchanged.
 
+## Global Primary CTA
+
+BH-034 resolves the shared primary CTA as Global Settings content. The existing `brounhall_global_settings` option stores `primary_cta_title`, `primary_cta_description`, and a controlled `primary_cta_link` shape (`title`, `url`, `target`), exposed through `brounhallGlobalSettings.primaryCtaTitle`, `primaryCtaDescription`, and `primaryCta`. URLs accept safe relative, HTTP(S), mailto, and tel links; targets are limited to supported values. No Page CTA field group or page-level override exists. HomeCta and BrandCta presentation remains frontend-owned; formal frontend integration is deferred to BH-079/BH-089.
+
 ## FAQ content model
 
 BH-032 uses reusable `faq` items because the frontend exposes an ordered collection of plain Question + Answer content. The FAQ item title is the question and `faq_answer` is a plain-text textarea; native Pages select and order FAQ Items through the `faqSection` field group. FAQ Items are GraphQL-visible supporting content without standalone public routing, and the page relationship is bounded by the selected items. Section title, description, help text, and the optional BH-019 contact link are stored only when configured on the Page; accordion behavior and FAQ schema remain frontend-owned.
