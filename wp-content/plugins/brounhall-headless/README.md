@@ -62,7 +62,11 @@ The `BrounHall Rich Text` ACF Free field group is attached to native Pages and e
 
 ## Text + Image fields
 
-The `BrounHall Text + Image` ACF Free field group is attached to native Pages and exposed through WPGraphQL for ACF as `textImage`. It provides optional eyebrow, title, and plain-text body fields plus an optional image using the BH-019 WordPress Media Library attachment-ID contract. Orientation, stacking, spacing, and other presentation choices remain frontend-owned. The current frontend has both visual split directions with the same content shape; BH-024 remains separate and undecided. Frontend consumption and the page-section GraphQL fragment are deferred to BH-058.
+The `BrounHall Text + Image` ACF Free field group is attached to native Pages and exposed through WPGraphQL for ACF as `textImage`. It provides optional eyebrow, title, and plain-text body fields plus an optional image using the BH-019 WordPress Media Library attachment-ID contract. Image + Text intentionally reuses this same CMS contract: the frontend `MediaSplit` component controls normal versus reversed visual ordering. Orientation, stacking, spacing, and other presentation choices remain frontend-owned; no `imageText` field or orientation setting is stored in WordPress. Frontend consumption and the page-section GraphQL fragment are deferred to BH-058.
+
+## Image + Text decision
+
+BH-024 is intentionally merged into BH-023. Frontend reverse layouts use the same `MediaSplit` props and editorial content shape, so a duplicate CMS field group is not required.
 
 ## Intentionally not implemented
 
