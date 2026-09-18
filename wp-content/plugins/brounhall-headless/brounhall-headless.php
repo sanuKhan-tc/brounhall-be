@@ -21,6 +21,7 @@ foreach ( array(
 	'navigation.php',
 	'seo.php',
 	'sections/hero.php',
+	'sections/rich-text.php',
 	'preview.php',
 	'revalidation.php',
 	'security.php',
