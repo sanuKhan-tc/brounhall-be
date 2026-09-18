@@ -94,7 +94,7 @@ BH-024 is intentionally merged into BH-023. Frontend reverse layouts use the sam
 
 ## Service/Treatment entity
 
-The reusable backend entity uses the stable technical post type key `service` and GraphQL names `Service`/`Services`, while the WordPress editor uses the source-proven user-facing labels **Treatment** and **Treatments**. Native title, slug, editor content, excerpt, and featured image provide the core entity fields. Service relationships are deferred to BH-045, SEO attachment to BH-047, Service GraphQL operations to BH-065, and frontend integration remains separate.
+The reusable backend entity uses the stable technical post type key `service` and GraphQL names `Service`/`Services`, while the WordPress editor uses the source-proven user-facing labels **Treatment** and **Treatments**. Native title, slug, editor content, excerpt, and featured image provide the core entity fields. BH-045 reviewed the frontend and found no source-proven Service-to-Doctor, Service-to-Location, Service-to-Department/Specialty, or other Service relationship: treatment records contain static treatment data and category labels only, while the appointment form independently selects a clinic and treatment. No relationship fields or reciprocal links are implemented. SEO attachment remains deferred to BH-047, Service GraphQL operations to BH-065, and frontend integration remains separate.
 
 ## Service Grid
 
