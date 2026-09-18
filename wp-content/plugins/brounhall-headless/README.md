@@ -48,6 +48,10 @@ BH-029 is a global-backed Statistics contract: the existing `brounhall_global_se
 
 BH-032 uses reusable `faq` items because the frontend exposes an ordered collection of plain Question + Answer content. The FAQ item title is the question and `faq_answer` is a plain-text textarea; native Pages select and order FAQ Items through the `faqSection` field group. FAQ Items are GraphQL-visible supporting content without standalone public routing, and the page relationship is bounded by the selected items. Section title, description, help text, and the optional BH-019 contact link are stored only when configured on the Page; accordion behavior and FAQ schema remain frontend-owned.
 
+## Article/Insight content model
+
+BH-042 deliberately uses native WordPress Posts as the Article/Insight model. The frontend presents the same editorial shape as “Fertility Insights & Resources” and `/blogs` content: title, slug, excerpt, body, featured image, category, and author, with native publication and modified dates available through WPGraphQL. No duplicate Article CPT or ACF fields are required. Native Posts are exposed as `Post`/`Posts`, and Next.js owns the public `/blogs` and `/blogs/[slug]` routes while WordPress retains its native post URI. Author values are not re-modeled because the current static content includes organization/display names rather than a proven WordPress-user contract; read time remains derived/presentation data. SEO is deferred to BH-047, related content to BH-033, and committed Article operations to BH-066.
+
 ## Common field definitions
 
 BH-019 provides project-owned PHP factories in `includes/fields.php` because ACF Free does not provide Clone fields. Image definitions use WordPress Media Library attachment IDs; link definitions use the ACF Link field's array shape (`title`, `url`, `target`). ACF Clone is intentionally not used.
