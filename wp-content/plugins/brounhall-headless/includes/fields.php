@@ -71,8 +71,8 @@ function brounhall_acf_field_definition( $key, $name, $label, $defaults, $args, 
 		return new WP_Error( 'brounhall_invalid_field_key', 'BrounHall field keys must use the field_brounhall_ namespace.' );
 	}
 
-	if ( ! is_string( $name ) || ! preg_match( '/^brounhall_[a-z0-9_]+$/', $name ) ) {
-		return new WP_Error( 'brounhall_invalid_field_name', 'BrounHall field names must use the brounhall_ namespace.' );
+	if ( ! is_string( $name ) || ! preg_match( '/^[a-z][a-z0-9_]*$/', $name ) ) {
+		return new WP_Error( 'brounhall_invalid_field_name', 'BrounHall field names must be safe lowercase identifiers.' );
 	}
 
 	if ( ! is_string( $label ) || '' === trim( $label ) || sanitize_text_field( $label ) !== trim( $label ) ) {
