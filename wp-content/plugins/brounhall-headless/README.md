@@ -52,6 +52,10 @@ BH-032 uses reusable `faq` items because the frontend exposes an ordered collect
 
 BH-042 deliberately uses native WordPress Posts as the Article/Insight model. The frontend presents the same editorial shape as “Fertility Insights & Resources” and `/blogs` content: title, slug, excerpt, body, featured image, category, and author, with native publication and modified dates available through WPGraphQL. No duplicate Article CPT or ACF fields are required. Native Posts are exposed as `Post`/`Posts`, and Next.js owns the public `/blogs` and `/blogs/[slug]` routes while WordPress retains its native post URI. Author values are not re-modeled because the current static content includes organization/display names rather than a proven WordPress-user contract; read time remains derived/presentation data. SEO is deferred to BH-047, related content to BH-033, and committed Article operations to BH-066.
 
+## Related Content
+
+BH-033 provides a Page-owned curated Related Content section for bounded Post selections. The `BrounHall Related Content` group is exposed as `relatedContent`; it stores only source-proven section title, description, optional link, and an ordered `related_content_posts` Relationship restricted to native `post` entities. Post title, slug, excerpt, featured image, and category remain native Post data and are not duplicated on Pages. The homepage’s current first-three static ordering maps to this curated section; blog-detail `getRelatedBlogs()` remains contextual/static-order behavior for later Article operations and mapping. Card presentation remains frontend-owned.
+
 ## Common field definitions
 
 BH-019 provides project-owned PHP factories in `includes/fields.php` because ACF Free does not provide Clone fields. Image definitions use WordPress Media Library attachment IDs; link definitions use the ACF Link field's array shape (`title`, `url`, `target`). ACF Clone is intentionally not used.
