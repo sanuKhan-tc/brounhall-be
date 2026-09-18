@@ -27,6 +27,7 @@ foreach ( array(
 	'sections/service-grid.php',
 	'sections/doctor-grid.php',
 	'sections/faq.php',
+	'sections/related-content.php',
 	'preview.php',
 	'revalidation.php',
 	'security.php',
