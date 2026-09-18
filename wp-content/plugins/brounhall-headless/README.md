@@ -128,6 +128,10 @@ BH-049 registers the plugin-owned `primary-navigation` location and the local de
 
 BH-050 registers two plugin-owned footer locations because the current footer has two distinct navigation groups: `footer-navigation` for the **BrounHall Footer Navigation** Quick Links menu and `footer-services` for the **BrounHall Footer Services** treatment groups. The first menu preserves the nine source-proven quick links, including the valid external Mediclinic and Careers URLs. The second preserves Fertility preservation, Genetic testing, Understand fertility, and Assisted Reproductive Technology group hierarchy with their source-proven treatment links; non-linked group headings use `#` only as non-navigational grouping items. Phone, email, social profiles, logo, brand copy, CTA, and copyright remain outside menus and belong to Global Settings or frontend presentation. GraphQL exposes the locations as `FOOTER_NAVIGATION` and `FOOTER_SERVICES`. Next.js mapping/rendering remains deferred; mega-menu behavior remains deferred to BH-051–BH-055.
 
+## Mega-menu layout vocabulary
+
+BH-051 defines one source-proven semantic layout key for future top-level primary-menu configuration: `mixed` — editor label **Columns with Featured Content**. It represents the current Fertility Treatments mega-menu: grouped treatment links arranged in columns plus a featured treatment image/link panel. No CSS, breakpoint, color, spacing, animation, or column-count values are part of the contract. Why Bourn Hall, Our Specialists, and Costs are ordinary hierarchical dropdowns and do not need an enum value; Fertility Treatments is the only current mega-menu. The helper `brounhall_get_mega_menu_layouts()` is the canonical vocabulary and `brounhall_is_mega_menu_layout()` is available for future validation. BH-052 will add the selector and top-level fields, BH-053 will add group/child fields, and frontend rendering remains a later integration concern.
+
 ## Local development
 
 - WordPress: http://brounhall-wp.local/
