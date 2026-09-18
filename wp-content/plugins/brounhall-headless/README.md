@@ -68,9 +68,13 @@ The `BrounHall Text + Image` ACF Free field group is attached to native Pages an
 
 BH-024 is intentionally merged into BH-023. Frontend reverse layouts use the same `MediaSplit` props and editorial content shape, so a duplicate CMS field group is not required.
 
+## Service/Treatment entity
+
+The reusable backend entity uses the stable technical post type key `service` and GraphQL names `Service`/`Services`, while the WordPress editor uses the source-proven user-facing labels **Treatment** and **Treatments**. Native title, slug, editor content, excerpt, and featured image provide the core entity fields. Service relationships are deferred to BH-045, SEO attachment to BH-047, Service GraphQL operations to BH-065, and frontend integration remains separate.
+
 ## Intentionally not implemented
 
-This release does not include custom post types, taxonomies, ACF field groups, GraphQL fields or persisted queries, navigation logic, SEO settings, preview, revalidation, forms, redirects, or frontend integration.
+This release does not include additional future content types, taxonomies, ACF field groups for the Service entity, persisted queries, navigation logic, SEO settings, preview, revalidation, forms, redirects, or frontend integration.
 
 ## Local development
 
