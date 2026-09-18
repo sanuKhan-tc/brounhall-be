@@ -15,6 +15,7 @@ define( 'BROUNHALL_HEADLESS_DIR', plugin_dir_path( __FILE__ ) );
 foreach ( array(
 	'fields.php',
 	'content-types.php',
+	'doctor.php',
 	'taxonomies.php',
 	'graphql.php',
 	'settings.php',
