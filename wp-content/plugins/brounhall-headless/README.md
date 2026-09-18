@@ -72,6 +72,10 @@ BH-024 is intentionally merged into BH-023. Frontend reverse layouts use the sam
 
 The reusable backend entity uses the stable technical post type key `service` and GraphQL names `Service`/`Services`, while the WordPress editor uses the source-proven user-facing labels **Treatment** and **Treatments**. Native title, slug, editor content, excerpt, and featured image provide the core entity fields. Service relationships are deferred to BH-045, SEO attachment to BH-047, Service GraphQL operations to BH-065, and frontend integration remains separate.
 
+## Service Grid
+
+The `BrounHall Service Grid` ACF Free field group is attached to native Pages and exposed as `serviceGrid`. Editors select and order canonical Treatments through the `service_grid_services` Relationship field, restricted to the `service` post type; Service title, slug, summary, and featured image remain on the Service entity and are not duplicated on the Page. The section also provides source-proven plain-text title/description fields and an optional BH-019 link field. The editorial selection is bounded and preserves selection order. All-Service operations remain deferred to BH-065; taxonomy filtering to future Service taxonomy work; Service relationships to BH-045; entity SEO to BH-047. Frontend pages remain static and unmodified.
+
 ## Intentionally not implemented
 
 This release does not include additional future content types, taxonomies, ACF field groups for the Service entity, persisted queries, navigation logic, SEO settings, preview, revalidation, forms, redirects, or frontend integration.
