@@ -9,6 +9,8 @@ add_action( 'acf/init', 'brounhall_register_doctor_field_group' );
 
 add_filter( 'acf/validate_value/key=field_brounhall_doctor_role', 'brounhall_validate_doctor_role', 10, 4 );
 add_filter( 'acf/update_value/key=field_brounhall_doctor_role', 'brounhall_sanitize_doctor_role', 10, 3 );
+add_filter( 'acf/validate_value/key=field_brounhall_doctor_location', 'brounhall_validate_doctor_location', 10, 4 );
+add_filter( 'acf/update_value/key=field_brounhall_doctor_location', 'brounhall_sanitize_doctor_location', 10, 3 );
 
 /**
  * Build the Doctor field group.
@@ -69,6 +71,17 @@ function brounhall_doctor_fields() {
 			'instructions' => 'The doctor’s editorial role or professional title.',
 			'maxlength'    => 200,
 		),
+		array(
+			'key'           => 'field_brounhall_doctor_location',
+			'label'         => 'Clinic',
+			'name'          => 'doctor_location',
+			'type'          => 'post_object',
+			'instructions'  => 'Select the clinic where this Doctor practices.',
+			'post_type'     => array( 'location' ),
+			'allow_null'    => 1,
+			'multiple'      => 0,
+			'return_format' => 'object',
+		),
 	);
 }
 
@@ -120,4 +133,39 @@ function brounhall_validate_doctor_role( $valid, $value, $field, $input ) {
  */
 function brounhall_sanitize_doctor_role( $value, $post_id, $field ) {
 	return is_string( $value ) ? sanitize_text_field( $value ) : '';
+}
+
+/**
+ * Ensure the Doctor clinic field only references Location posts.
+ *
+ * @param bool|string $valid Whether the value is valid so far.
+ * @param mixed       $value Submitted value.
+ * @param array       $field ACF field definition.
+ * @param string      $input Input name.
+ * @return bool|string
+ */
+function brounhall_validate_doctor_location( $valid, $value, $field, $input ) {
+	if ( true !== $valid || empty( $value ) ) {
+		return $valid;
+	}
+
+	$id = is_object( $value ) && isset( $value->ID ) ? absint( $value->ID ) : absint( $value );
+
+	if ( ! $id || 'location' !== get_post_type( $id ) ) {
+		return __( 'Only Clinics can be selected.', 'brounhall-headless' );
+	}
+
+	return $valid;
+}
+
+/**
+ * Store the Doctor clinic relation as a canonical Location post ID.
+ *
+ * @param mixed $value Submitted value.
+ * @param mixed $post_id Post identifier.
+ * @param array $field ACF field definition.
+ * @return int
+ */
+function brounhall_sanitize_doctor_location( $value, $post_id, $field ) {
+	return is_object( $value ) && isset( $value->ID ) ? absint( $value->ID ) : absint( $value );
 }

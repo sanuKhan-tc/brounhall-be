@@ -102,7 +102,11 @@ The `BrounHall Service Grid` ACF Free field group is attached to native Pages an
 
 ## Doctor entity
 
-The reusable people represented by the current frontend are doctors and fertility specialists, so BH-039 uses the stable `doctor` post type with **Doctor** / **Doctors** editor labels and GraphQL names. Native title, editor content, revisions, and featured image provide the name, biography, and portrait; the only custom field is the plain-text `doctor_role` field exposed through `doctorProfile`. Qualifications, languages, clinic/location, specialty, Doctor relationships, booking behavior, and entity SEO remain deferred to their owning tasks. The Doctor Grid remains deferred to BH-027 and frontend pages remain static.
+The reusable people represented by the current frontend are doctors and fertility specialists, so BH-039 uses the stable `doctor` post type with **Doctor** / **Doctors** editor labels and GraphQL names. Native title, editor content, revisions, and featured image provide the name, biography, and portrait; the `doctor_role` and nullable `doctor_location` fields are exposed through `doctorProfile`. The clinic field is a single ACF Post Object restricted to the canonical `location` post type and is exposed as `doctorLocation`. Qualifications, languages, specialty, Doctor-to-Service relationships, Doctor-to-Department/Specialty relationships, booking behavior, and entity SEO remain deferred to their owning tasks. The Doctor Grid remains deferred to BH-027 and frontend pages remain static.
+
+## Doctor relationships
+
+BH-044 adds the source-proven Doctor-to-Location relationship. Each current frontend Doctor belongs to one Clinic, and the Doctors directory filters by that Clinic. Editors assign one canonical Clinic to a Doctor in the `doctorProfile` group; the field is nullable for legacy or incomplete records. Doctor-to-Service and Doctor-to-Department/Specialty relationships are not source-proven and remain unimplemented.
 
 ## Doctor Grid
 
