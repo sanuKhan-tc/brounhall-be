@@ -118,7 +118,11 @@ BH-046 is intentionally N/A. No canonical Department/Specialty entity exists in 
 
 ## Intentionally not implemented
 
-This release does not include additional future content types, taxonomies, ACF field groups for the Service entity, persisted queries, navigation logic, SEO settings, preview, revalidation, forms, redirects, or frontend integration.
+This release does not include additional future content types, taxonomies, ACF field groups for the Service entity, persisted queries, mega-menu configuration, SEO settings, preview, revalidation, forms, redirects, or frontend integration.
+
+## Primary navigation
+
+BH-049 registers the plugin-owned `primary-navigation` location and the local development menu **BrounHall Primary Navigation**. Its initial hierarchy follows the current frontend header: Why Bourn Hall (with Who We Are, Mission, Vision & Values, and Accreditation → JCI Accreditation/CAP Accreditation), Fertility Treatments, Our Specialists (with Doctors and Embryologists), Our Success Rates, and Costs (with Insurance, Finance, and Packages). The header's Book a Consultation control is a CTA, not a menu item. The menu stores relative frontend paths as controlled custom links where native WordPress records are not yet the source of the route. Next.js remains responsible for later menu querying, mapping, and rendering; mega-menu fields and presentation are deferred to BH-051–BH-055.
 
 ## Local development
 
