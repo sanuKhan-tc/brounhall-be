@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 
 add_action( 'init', 'brounhall_register_service_post_type' );
 add_action( 'init', 'brounhall_register_doctor_post_type' );
+add_action( 'init', 'brounhall_register_location_post_type' );
 add_action( 'init', 'brounhall_register_faq_post_type' );
 
 /**
@@ -87,6 +88,47 @@ function brounhall_register_doctor_post_type() {
 			'show_in_graphql'     => true,
 			'graphql_single_name' => 'Doctor',
 			'graphql_plural_name' => 'Doctors',
+		)
+	);
+}
+
+/**
+ * Register reusable locations, presented to editors as Clinics.
+ *
+ * @return void
+ */
+function brounhall_register_location_post_type() {
+	register_post_type(
+		'location',
+		array(
+			'labels'              => array(
+				'name'               => __( 'Clinics', 'brounhall-headless' ),
+				'singular_name'      => __( 'Clinic', 'brounhall-headless' ),
+				'add_new'            => __( 'Add Clinic', 'brounhall-headless' ),
+				'add_new_item'       => __( 'Add Clinic', 'brounhall-headless' ),
+				'edit_item'          => __( 'Edit Clinic', 'brounhall-headless' ),
+				'new_item'           => __( 'New Clinic', 'brounhall-headless' ),
+				'view_item'          => __( 'View Clinic', 'brounhall-headless' ),
+				'search_items'       => __( 'Search Clinics', 'brounhall-headless' ),
+				'not_found'          => __( 'No clinics found.', 'brounhall-headless' ),
+				'menu_name'          => __( 'Clinics', 'brounhall-headless' ),
+			),
+			'public'              => true,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'show_in_rest'        => true,
+			'has_archive'         => false,
+			'rewrite'             => array(
+				'slug'       => 'clinics',
+				'with_front' => false,
+			),
+			'query_var'           => true,
+			'supports'            => array( 'title', 'excerpt', 'thumbnail', 'revisions' ),
+			'capability_type'     => 'post',
+			'map_meta_cap'        => true,
+			'show_in_graphql'     => true,
+			'graphql_single_name' => 'Location',
+			'graphql_plural_name' => 'Locations',
 		)
 	);
 }

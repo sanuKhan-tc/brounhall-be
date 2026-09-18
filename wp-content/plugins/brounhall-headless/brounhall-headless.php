@@ -16,6 +16,7 @@ foreach ( array(
 	'fields.php',
 	'content-types.php',
 	'doctor.php',
+	'location.php',
 	'taxonomies.php',
 	'graphql.php',
 	'settings.php',
