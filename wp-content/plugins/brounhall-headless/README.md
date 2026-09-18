@@ -20,7 +20,7 @@ These plugins are expected to provide the underlying integrations; this foundati
 - `graphql.php` — future GraphQL integration
 - `settings.php` — future project settings integration
 - `navigation.php` — future navigation integration
-- `seo.php` — future SEO integration
+- `seo.php` — reusable SEO field group for native Pages
 - `preview.php` — future preview integration
 - `revalidation.php` — future revalidation integration
 - `security.php` — future security integration
@@ -45,6 +45,12 @@ Media and reusable link fields are deferred to BH-019. SEO fields are deferred t
 BH-019 provides project-owned PHP factories in `includes/fields.php` because ACF Free does not provide Clone fields. Image definitions use WordPress Media Library attachment IDs; link definitions use the ACF Link field's array shape (`title`, `url`, `target`). ACF Clone is intentionally not used.
 
 Social collections are deferred. Logo/media attachment, SEO image/link fields, page-section consumers, and GraphQL media/link fragments remain deferred to their later tasks.
+
+## SEO fields
+
+The `BrounHall SEO` ACF Free field group is attached to native WordPress Pages and exposed through WPGraphQL for ACF as `seo`. It provides optional meta title/description, canonical URL override, robots index/follow, Open Graph title/description/image, Twitter title/description/image, and breadcrumb title fields. Empty values intentionally allow frontend fallbacks.
+
+The image fields reuse the BH-019 Media Library attachment-ID contract. Future CPT attachment is deferred to BH-047, the frontend `SeoFields` fragment to BH-056, and Next.js SEO rendering to BH-102+. No Yoast or Rank Math dependency is used.
 
 ## Intentionally not implemented
 
