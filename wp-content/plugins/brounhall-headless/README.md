@@ -76,6 +76,10 @@ The reusable backend entity uses the stable technical post type key `service` an
 
 The `BrounHall Service Grid` ACF Free field group is attached to native Pages and exposed as `serviceGrid`. Editors select and order canonical Treatments through the `service_grid_services` Relationship field, restricted to the `service` post type; Service title, slug, summary, and featured image remain on the Service entity and are not duplicated on the Page. The section also provides source-proven plain-text title/description fields and an optional BH-019 link field. The editorial selection is bounded and preserves selection order. All-Service operations remain deferred to BH-065; taxonomy filtering to future Service taxonomy work; Service relationships to BH-045; entity SEO to BH-047. Frontend pages remain static and unmodified.
 
+## Doctor entity
+
+The reusable people represented by the current frontend are doctors and fertility specialists, so BH-039 uses the stable `doctor` post type with **Doctor** / **Doctors** editor labels and GraphQL names. Native title, editor content, revisions, and featured image provide the name, biography, and portrait; the only custom field is the plain-text `doctor_role` field exposed through `doctorProfile`. Qualifications, languages, clinic/location, specialty, Doctor relationships, booking behavior, and entity SEO remain deferred to their owning tasks. The Doctor Grid remains deferred to BH-027 and frontend pages remain static.
+
 ## Intentionally not implemented
 
 This release does not include additional future content types, taxonomies, ACF field groups for the Service entity, persisted queries, navigation logic, SEO settings, preview, revalidation, forms, redirects, or frontend integration.
