@@ -24,6 +24,7 @@ These plugins are expected to provide the underlying integrations; this foundati
 - `preview.php` — future preview integration
 - `revalidation.php` — future revalidation integration
 - `security.php` — future security integration
+- `fields.php` — reusable ACF Free media/link field definitions
 
 No module currently implements business behavior.
 
@@ -38,6 +39,12 @@ Page identity remains native to WordPress: title, slug/permalink, publication st
 `Settings → BrounHall Settings` stores the four BH-018 editorial scalar values in the `brounhall_global_settings` option: public phone, public email, public address, and footer copyright text. The native WordPress site title (`blogname`) remains the canonical site-name setting.
 
 Media and reusable link fields are deferred to BH-019. SEO fields are deferred to BH-020. CMS settings must not contain secrets or infrastructure configuration.
+
+## Common field definitions
+
+BH-019 provides project-owned PHP factories in `includes/fields.php` because ACF Free does not provide Clone fields. Image definitions use WordPress Media Library attachment IDs; link definitions use the ACF Link field's array shape (`title`, `url`, `target`). ACF Clone is intentionally not used.
+
+Social collections are deferred. Logo/media attachment, SEO image/link fields, page-section consumers, and GraphQL media/link fragments remain deferred to their later tasks.
 
 ## Intentionally not implemented
 
