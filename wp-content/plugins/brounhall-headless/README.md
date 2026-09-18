@@ -124,3 +124,24 @@ This release does not include additional future content types, taxonomies, ACF f
 
 - WordPress: http://brounhall-wp.local/
 - GraphQL: http://brounhall-wp.local/graphql
+
+## Representative development fixtures
+
+BH-048 retains a small local-only dataset for GraphQL and integration work; these records are not production content and are not a frontend migration. The fixtures were created once with the WordPress post and ACF APIs through a local PHP command, using stable slugs and an existing-record check so rerunning the operation does not create duplicates. No permanent seeder runs automatically.
+
+| Entity | ID | Slug | Purpose |
+| --- | ---: | --- | --- |
+| Clinic | 38 | `brounhall-clinic-dubai` | Published Location collection/detail fixture |
+| Clinic | 39 | `brounhall-clinic-abu-dhabi` | Published Location and Doctor relationship target |
+| Doctor | 40 | `dr-ghada-hussein` | Published Doctor with `doctorLocation` → Location 39 and populated SEO overrides |
+| Doctor | 41 | `dr-sara-al-nuaimi` | Published Doctor with nullable `doctorLocation` empty and default SEO overrides |
+| Treatment | 42 | `ivf` | Published Service entity fixture |
+| Treatment | 43 | `icsi` | Published Service entity fixture |
+| Post | 44 | `fertility-test-guide` | Published native Article/Insight fixture |
+| Post | 45 | `first-ivf-consultation` | Published native Article/Insight fixture |
+| FAQ Item | 46 | `when-should-i-see-a-fertility-specialist` | Published plain-text FAQ fixture |
+| FAQ Item | 47 | `what-happens-at-the-first-consultation` | Published plain-text FAQ fixture |
+
+Doctor 40 is the linked relationship case; Doctor 41 intentionally preserves the nullable/unlinked case. No Service, Location, Department, or FAQ relationships were added. Doctor 40 contains representative non-production SEO overrides for title, description, canonical URL, robots, Open Graph, Twitter, and breadcrumb fields; its image fields are empty because the local Media Library has no suitable existing asset. Doctor 41, the Locations, Services, Posts, and existing Sample Page use empty SEO overrides with the normal robots defaults. Global Settings were preserved unchanged.
+
+To reset local fixtures, delete the listed records by ID in WordPress Admin (or with the normal WordPress post APIs); no production reset or migration is provided. To reproduce them, rerun the BH-048 idempotent local API seeding operation using the same post types and slugs. The fixtures are intentionally retained for subsequent local contract tests.
