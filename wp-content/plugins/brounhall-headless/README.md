@@ -124,6 +124,10 @@ This release does not include additional future content types, taxonomies, ACF f
 
 BH-049 registers the plugin-owned `primary-navigation` location and the local development menu **BrounHall Primary Navigation**. Its initial hierarchy follows the current frontend header: Why Bourn Hall (with Who We Are, Mission, Vision & Values, and Accreditation → JCI Accreditation/CAP Accreditation), Fertility Treatments, Our Specialists (with Doctors and Embryologists), Our Success Rates, and Costs (with Insurance, Finance, and Packages). The header's Book a Consultation control is a CTA, not a menu item. The menu stores relative frontend paths as controlled custom links where native WordPress records are not yet the source of the route. Next.js remains responsible for later menu querying, mapping, and rendering; mega-menu fields and presentation are deferred to BH-051–BH-055.
 
+## Footer navigation
+
+BH-050 registers two plugin-owned footer locations because the current footer has two distinct navigation groups: `footer-navigation` for the **BrounHall Footer Navigation** Quick Links menu and `footer-services` for the **BrounHall Footer Services** treatment groups. The first menu preserves the nine source-proven quick links, including the valid external Mediclinic and Careers URLs. The second preserves Fertility preservation, Genetic testing, Understand fertility, and Assisted Reproductive Technology group hierarchy with their source-proven treatment links; non-linked group headings use `#` only as non-navigational grouping items. Phone, email, social profiles, logo, brand copy, CTA, and copyright remain outside menus and belong to Global Settings or frontend presentation. GraphQL exposes the locations as `FOOTER_NAVIGATION` and `FOOTER_SERVICES`. Next.js mapping/rendering remains deferred; mega-menu behavior remains deferred to BH-051–BH-055.
+
 ## Local development
 
 - WordPress: http://brounhall-wp.local/
