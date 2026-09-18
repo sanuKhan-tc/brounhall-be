@@ -44,6 +44,10 @@ Media and reusable link fields are deferred to BH-019. SEO fields are deferred t
 
 BH-029 is a global-backed Statistics contract: the existing `brounhall_global_settings` option owns the semantic `success_rate`, `live_births`, and `years_of_trusted_care` display values, exposed through the public `brounhallGlobalSettings` GraphQL object. Labels remain frontend-owned (`Success Rates`, `Live Births`, and `Years of Trusted Care`), as do StatsRow count-up animation and presentation. No Page-level metric fields or repeated metric structure is created. The homepage and About static values currently conflict; final production figures require a content-owner decision. BH-059 will own the typed `GetGlobalSettings` operation, and the existing frontend remains unchanged.
 
+## FAQ content model
+
+BH-032 uses reusable `faq` items because the frontend exposes an ordered collection of plain Question + Answer content. The FAQ item title is the question and `faq_answer` is a plain-text textarea; native Pages select and order FAQ Items through the `faqSection` field group. FAQ Items are GraphQL-visible supporting content without standalone public routing, and the page relationship is bounded by the selected items. Section title, description, help text, and the optional BH-019 contact link are stored only when configured on the Page; accordion behavior and FAQ schema remain frontend-owned.
+
 ## Common field definitions
 
 BH-019 provides project-owned PHP factories in `includes/fields.php` because ACF Free does not provide Clone fields. Image definitions use WordPress Media Library attachment IDs; link definitions use the ACF Link field's array shape (`title`, `url`, `target`). ACF Clone is intentionally not used.

@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 
 add_action( 'init', 'brounhall_register_service_post_type' );
 add_action( 'init', 'brounhall_register_doctor_post_type' );
+add_action( 'init', 'brounhall_register_faq_post_type' );
 
 /**
  * Register the reusable Service entity. Editors see this as Treatments.
@@ -86,6 +87,46 @@ function brounhall_register_doctor_post_type() {
 			'show_in_graphql'     => true,
 			'graphql_single_name' => 'Doctor',
 			'graphql_plural_name' => 'Doctors',
+		)
+	);
+}
+
+/**
+ * Register supporting FAQ items without creating standalone public pages.
+ *
+ * @return void
+ */
+function brounhall_register_faq_post_type() {
+	register_post_type(
+		'faq',
+		array(
+			'labels'              => array(
+				'name'               => __( 'FAQ Items', 'brounhall-headless' ),
+				'singular_name'      => __( 'FAQ Item', 'brounhall-headless' ),
+				'add_new'            => __( 'Add FAQ Item', 'brounhall-headless' ),
+				'add_new_item'       => __( 'Add FAQ Item', 'brounhall-headless' ),
+				'edit_item'          => __( 'Edit FAQ Item', 'brounhall-headless' ),
+				'new_item'           => __( 'New FAQ Item', 'brounhall-headless' ),
+				'view_item'          => __( 'View FAQ Item', 'brounhall-headless' ),
+				'search_items'       => __( 'Search FAQ Items', 'brounhall-headless' ),
+				'not_found'          => __( 'No FAQ items found.', 'brounhall-headless' ),
+				'menu_name'          => __( 'FAQ Items', 'brounhall-headless' ),
+			),
+			'public'              => true,
+			'publicly_queryable'  => false,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'show_in_rest'        => true,
+			'exclude_from_search' => true,
+			'has_archive'         => false,
+			'rewrite'             => false,
+			'query_var'           => false,
+			'supports'            => array( 'title', 'revisions' ),
+			'capability_type'     => 'post',
+			'map_meta_cap'        => true,
+			'show_in_graphql'     => true,
+			'graphql_single_name' => 'Faq',
+			'graphql_plural_name' => 'Faqs',
 		)
 	);
 }
