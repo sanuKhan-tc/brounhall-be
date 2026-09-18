@@ -21,14 +21,15 @@ foreach ( array(
 }
 
 add_filter( 'acf/validate_value/key=field_brounhall_seo_canonical_url', 'brounhall_validate_seo_canonical_url', 10, 4 );
+add_filter( 'acf/update_value/key=field_brounhall_seo_canonical_url', 'brounhall_sanitize_seo_canonical_url', 10, 3 );
 
 /**
- * Build the reusable SEO field group for approved post types.
+ * Build the reusable SEO field group for approved routable post types.
  *
  * @param string[] $post_types Post types that should receive the group.
  * @return array<string, mixed>|WP_Error
  */
-function brounhall_seo_field_group( $post_types = array( 'page' ) ) {
+function brounhall_seo_field_group( $post_types = array( 'page', 'doctor', 'service', 'location', 'post' ) ) {
 	if ( ! is_array( $post_types ) || empty( $post_types ) ) {
 		return new WP_Error( 'brounhall_invalid_seo_post_types', 'SEO field group post types must be a non-empty array.' );
 	}
@@ -167,7 +168,7 @@ function brounhall_seo_fields() {
 }
 
 /**
- * Register SEO for native Pages only at this stage.
+ * Register SEO for all approved routable entity types.
  *
  * @return void
  */
@@ -176,7 +177,7 @@ function brounhall_register_seo_field_group() {
 		return;
 	}
 
-	$field_group = brounhall_seo_field_group( array( 'page' ) );
+	$field_group = brounhall_seo_field_group( array( 'page', 'doctor', 'service', 'location', 'post' ) );
 
 	if ( ! is_wp_error( $field_group ) ) {
 		acf_add_local_field_group( $field_group );
@@ -230,4 +231,20 @@ function brounhall_validate_seo_canonical_url( $valid, $value, $field, $input ) 
 		&& '' !== esc_url_raw( $value, array( 'http', 'https' ) );
 
 	return $valid_url ? $valid : __( 'Enter a valid public http or https URL.', 'brounhall-headless' );
+}
+
+/**
+ * Store canonical overrides as safe absolute http/https URLs.
+ *
+ * @param mixed $value Submitted value.
+ * @param mixed $post_id Post identifier.
+ * @param array $field ACF field definition.
+ * @return string
+ */
+function brounhall_sanitize_seo_canonical_url( $value, $post_id, $field ) {
+	if ( ! is_string( $value ) || '' === trim( $value ) ) {
+		return '';
+	}
+
+	return esc_url_raw( $value, array( 'http', 'https' ) );
 }
