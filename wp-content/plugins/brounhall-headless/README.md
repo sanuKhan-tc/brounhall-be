@@ -20,7 +20,7 @@ These plugins are expected to provide the underlying integrations; this foundati
 - `graphql.php` — future GraphQL integration
 - `settings.php` — future project settings integration
 - `navigation.php` — future navigation integration
-- `seo.php` — reusable SEO field group for native Pages
+- `seo.php` — reusable SEO field group for routable content types
 - `preview.php` — future preview integration
 - `revalidation.php` — future revalidation integration
 - `security.php` — future security integration
@@ -50,7 +50,7 @@ BH-034 resolves the shared primary CTA as Global Settings content. The existing 
 
 ## Location/Clinic entity
 
-BH-043 uses the canonical technical post type `location` with editor-facing labels **Clinic** / **Clinics** and GraphQL names `Location` / `Locations`. The frontend has reusable clinic records with stable `/clinics/[slug]` routes, location-specific addresses, phones, hours, images, and summaries. Native title, excerpt, featured image, slug, and revisions provide the core entity; the `locationDetails` group adds only the source-proven short display name, clinic phone, and plain-text opening hours. Coordinates, map embeds, directions URLs, email, and relationships to doctors/services/departments are not currently source-proven or are deferred. SEO remains deferred to BH-047 and frontend content remains static.
+BH-043 uses the canonical technical post type `location` with editor-facing labels **Clinic** / **Clinics** and GraphQL names `Location` / `Locations`. The frontend has reusable clinic records with stable `/clinics/[slug]` routes, location-specific addresses, phones, hours, images, and summaries. Native title, excerpt, featured image, slug, and revisions provide the core entity; the `locationDetails` group adds only the source-proven short display name, clinic phone, and plain-text opening hours. Coordinates, map embeds, directions URLs, email, and relationships to doctors/services/departments are not currently source-proven or are deferred. Routable Location records receive the shared `seo` group from BH-047 and frontend content remains static.
 
 ## FAQ content model
 
@@ -58,7 +58,7 @@ BH-032 uses reusable `faq` items because the frontend exposes an ordered collect
 
 ## Article/Insight content model
 
-BH-042 deliberately uses native WordPress Posts as the Article/Insight model. The frontend presents the same editorial shape as “Fertility Insights & Resources” and `/blogs` content: title, slug, excerpt, body, featured image, category, and author, with native publication and modified dates available through WPGraphQL. No duplicate Article CPT or ACF fields are required. Native Posts are exposed as `Post`/`Posts`, and Next.js owns the public `/blogs` and `/blogs/[slug]` routes while WordPress retains its native post URI. Author values are not re-modeled because the current static content includes organization/display names rather than a proven WordPress-user contract; read time remains derived/presentation data. SEO is deferred to BH-047, related content to BH-033, and committed Article operations to BH-066.
+BH-042 deliberately uses native WordPress Posts as the Article/Insight model. The frontend presents the same editorial shape as “Fertility Insights & Resources” and `/blogs` content: title, slug, excerpt, body, featured image, category, and author, with native publication and modified dates available through WPGraphQL. No duplicate Article CPT or ACF fields are required. Native Posts are exposed as `Post`/`Posts`, and Next.js owns the public `/blogs` and `/blogs/[slug]` routes while WordPress retains its native post URI. Author values are not re-modeled because the current static content includes organization/display names rather than a proven WordPress-user contract; read time remains derived/presentation data. Routable Posts receive the shared `seo` group from BH-047; related content remains owned by BH-033, and committed Article operations remain deferred to BH-066.
 
 ## Related Content
 
@@ -72,9 +72,9 @@ Social collections are deferred. Logo/media attachment, SEO image/link fields, p
 
 ## SEO fields
 
-The `BrounHall SEO` ACF Free field group is attached to native WordPress Pages and exposed through WPGraphQL for ACF as `seo`. It provides optional meta title/description, canonical URL override, robots index/follow, Open Graph title/description/image, Twitter title/description/image, and breadcrumb title fields. Empty values intentionally allow frontend fallbacks.
+BH-047 attaches one reusable `BrounHall SEO` ACF Free field group to all currently routable entity types: native Pages, Doctors, Treatments/Services, Clinics/Locations, and native Posts used by the `/blogs/[slug]` frontend route. It is exposed through WPGraphQL for ACF as the consistent `seo` field. The contract provides optional meta title/description, canonical URL override, robots index/follow, Open Graph title/description/image, Twitter title/description/image, and breadcrumb title fields. Text and image overrides are optional; robots defaults are enabled; empty overrides allow later frontend fallback logic.
 
-The image fields reuse the BH-019 Media Library attachment-ID contract. Future CPT attachment is deferred to BH-047, the frontend `SeoFields` fragment to BH-056, and Next.js SEO rendering to BH-102+. No Yoast or Rank Math dependency is used.
+Canonical overrides are restricted to absolute `http`/`https` URLs and unsafe schemes are rejected/sanitized. Image fields reuse the BH-019 Media Library attachment-ID contract. FAQs remain non-routable support content and Global Settings remains global configuration, so neither receives per-record SEO fields. Department/Specialty remains absent. The frontend `SeoFields` fragment and Next.js metadata rendering remain deferred to later frontend SEO tasks. No Yoast or Rank Math dependency is used.
 
 ## Hero fields
 
@@ -94,7 +94,7 @@ BH-024 is intentionally merged into BH-023. Frontend reverse layouts use the sam
 
 ## Service/Treatment entity
 
-The reusable backend entity uses the stable technical post type key `service` and GraphQL names `Service`/`Services`, while the WordPress editor uses the source-proven user-facing labels **Treatment** and **Treatments**. Native title, slug, editor content, excerpt, and featured image provide the core entity fields. BH-045 reviewed the frontend and found no source-proven Service-to-Doctor, Service-to-Location, Service-to-Department/Specialty, or other Service relationship: treatment records contain static treatment data and category labels only, while the appointment form independently selects a clinic and treatment. No relationship fields or reciprocal links are implemented. SEO attachment remains deferred to BH-047, Service GraphQL operations to BH-065, and frontend integration remains separate.
+The reusable backend entity uses the stable technical post type key `service` and GraphQL names `Service`/`Services`, while the WordPress editor uses the source-proven user-facing labels **Treatment** and **Treatments**. Native title, slug, editor content, excerpt, and featured image provide the core entity fields. BH-045 reviewed the frontend and found no source-proven Service-to-Doctor, Service-to-Location, Service-to-Department/Specialty, or other Service relationship: treatment records contain static treatment data and category labels only, while the appointment form independently selects a clinic and treatment. No relationship fields or reciprocal links are implemented. Routable Service records receive the shared `seo` group from BH-047; Service GraphQL operations remain deferred to BH-065, and frontend integration remains separate.
 
 ## Service Grid
 
@@ -102,7 +102,7 @@ The `BrounHall Service Grid` ACF Free field group is attached to native Pages an
 
 ## Doctor entity
 
-The reusable people represented by the current frontend are doctors and fertility specialists, so BH-039 uses the stable `doctor` post type with **Doctor** / **Doctors** editor labels and GraphQL names. Native title, editor content, revisions, and featured image provide the name, biography, and portrait; the `doctor_role` and nullable `doctor_location` fields are exposed through `doctorProfile`. The clinic field is a single ACF Post Object restricted to the canonical `location` post type and is exposed as `doctorLocation`. Qualifications, languages, specialty, Doctor-to-Service relationships, Doctor-to-Department/Specialty relationships, booking behavior, and entity SEO remain deferred to their owning tasks. The Doctor Grid remains deferred to BH-027 and frontend pages remain static.
+The reusable people represented by the current frontend are doctors and fertility specialists, so BH-039 uses the stable `doctor` post type with **Doctor** / **Doctors** editor labels and GraphQL names. Native title, editor content, revisions, and featured image provide the name, biography, and portrait; the `doctor_role` and nullable `doctor_location` fields are exposed through `doctorProfile`. The clinic field is a single ACF Post Object restricted to the canonical `location` post type and is exposed as `doctorLocation`. Qualifications, languages, specialty, Doctor-to-Service relationships, Doctor-to-Department/Specialty relationships, and booking behavior remain deferred to their owning tasks; routable Doctor records receive the shared `seo` group from BH-047. The Doctor Grid remains deferred to BH-027 and frontend pages remain static.
 
 ## Doctor relationships
 
