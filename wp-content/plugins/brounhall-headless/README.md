@@ -110,7 +110,7 @@ BH-044 adds the source-proven Doctor-to-Location relationship. Each current fron
 
 ## Doctor Grid
 
-The `BrounHall Doctor Grid` ACF Free field group is attached to native Pages and exposed as `doctorGrid`. Editors select and order canonical Doctors through the `doctor_grid_doctors` Relationship field, restricted to the `doctor` post type; Doctor name, role, portrait, slug, and biography remain on the Doctor entity and are not duplicated on the Page. The section also provides source-proven plain-text title/description fields and an optional BH-019 link field. The selection is bounded and preserves editor order. Specialty/department relationships remain deferred to BH-040/BH-044, clinic/location to BH-043, entity SEO to BH-047, and the Doctor Grid frontend remains static and unmodified.
+The `BrounHall Doctor Grid` ACF Free field group is attached to native Pages and exposed as `doctorGrid`. Editors select and order canonical Doctors through the `doctor_grid_doctors` Relationship field, restricted to the `doctor` post type; Doctor name, role, portrait, slug, and biography remain on the Doctor entity and are not duplicated on the Page. The section also provides source-proven plain-text title/description fields and an optional BH-019 link field. The selection is bounded and preserves editor order. Specialty/department relationships remain unimplemented because BH-040 found no independent entity; Doctor-to-Location is provided by BH-044, entity SEO remains deferred to BH-047, and the Doctor Grid frontend remains static and unmodified.
 
 ## Intentionally not implemented
 
