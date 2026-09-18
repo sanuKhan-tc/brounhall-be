@@ -23,6 +23,7 @@ foreach ( array(
 	'sections/hero.php',
 	'sections/rich-text.php',
 	'sections/text-image.php',
+	'sections/service-grid.php',
 	'preview.php',
 	'revalidation.php',
 	'security.php',
