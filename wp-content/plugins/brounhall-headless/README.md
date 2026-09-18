@@ -36,9 +36,13 @@ Page identity remains native to WordPress: title, slug/permalink, publication st
 
 ## Global settings
 
-`Settings → BrounHall Settings` stores the four BH-018 editorial scalar values in the `brounhall_global_settings` option: public phone, public email, public address, and footer copyright text. The native WordPress site title (`blogname`) remains the canonical site-name setting.
+`Settings → BrounHall Settings` stores the BH-018 editorial scalar values and the BH-029 organization metrics in the `brounhall_global_settings` option: public phone, public email, public address, footer copyright text, success rate, live births, and years of trusted care. The native WordPress site title (`blogname`) remains the canonical site-name setting. Metric values remain empty until approved production figures are supplied.
 
 Media and reusable link fields are deferred to BH-019. SEO fields are deferred to BH-020. CMS settings must not contain secrets or infrastructure configuration.
+
+## Global Statistics
+
+BH-029 is a global-backed Statistics contract: the existing `brounhall_global_settings` option owns the semantic `success_rate`, `live_births`, and `years_of_trusted_care` display values, exposed through the public `brounhallGlobalSettings` GraphQL object. Labels remain frontend-owned (`Success Rates`, `Live Births`, and `Years of Trusted Care`), as do StatsRow count-up animation and presentation. No Page-level metric fields or repeated metric structure is created. The homepage and About static values currently conflict; final production figures require a content-owner decision. BH-059 will own the typed `GetGlobalSettings` operation, and the existing frontend remains unchanged.
 
 ## Common field definitions
 
