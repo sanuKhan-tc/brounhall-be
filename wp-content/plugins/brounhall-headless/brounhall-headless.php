@@ -13,6 +13,7 @@ define( 'BROUNHALL_HEADLESS_VERSION', '0.1.0' );
 define( 'BROUNHALL_HEADLESS_DIR', plugin_dir_path( __FILE__ ) );
 
 foreach ( array(
+	'fields.php',
 	'content-types.php',
 	'taxonomies.php',
 	'graphql.php',
