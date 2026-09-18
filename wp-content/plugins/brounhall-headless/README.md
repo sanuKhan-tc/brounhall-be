@@ -48,6 +48,10 @@ BH-029 is a global-backed Statistics contract: the existing `brounhall_global_se
 
 BH-034 resolves the shared primary CTA as Global Settings content. The existing `brounhall_global_settings` option stores `primary_cta_title`, `primary_cta_description`, and a controlled `primary_cta_link` shape (`title`, `url`, `target`), exposed through `brounhallGlobalSettings.primaryCtaTitle`, `primaryCtaDescription`, and `primaryCta`. URLs accept safe relative, HTTP(S), mailto, and tel links; targets are limited to supported values. No Page CTA field group or page-level override exists. HomeCta and BrandCta presentation remains frontend-owned; formal frontend integration is deferred to BH-079/BH-089.
 
+## Location/Clinic entity
+
+BH-043 uses the canonical technical post type `location` with editor-facing labels **Clinic** / **Clinics** and GraphQL names `Location` / `Locations`. The frontend has reusable clinic records with stable `/clinics/[slug]` routes, location-specific addresses, phones, hours, images, and summaries. Native title, excerpt, featured image, slug, and revisions provide the core entity; the `locationDetails` group adds only the source-proven short display name, clinic phone, and plain-text opening hours. Coordinates, map embeds, directions URLs, email, and relationships to doctors/services/departments are not currently source-proven or are deferred. SEO remains deferred to BH-047 and frontend content remains static.
+
 ## FAQ content model
 
 BH-032 uses reusable `faq` items because the frontend exposes an ordered collection of plain Question + Answer content. The FAQ item title is the question and `faq_answer` is a plain-text textarea; native Pages select and order FAQ Items through the `faqSection` field group. FAQ Items are GraphQL-visible supporting content without standalone public routing, and the page relationship is bounded by the selected items. Section title, description, help text, and the optional BH-019 contact link are stored only when configured on the Page; accordion behavior and FAQ schema remain frontend-owned.
