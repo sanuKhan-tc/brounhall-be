@@ -80,6 +80,10 @@ The `BrounHall Service Grid` ACF Free field group is attached to native Pages an
 
 The reusable people represented by the current frontend are doctors and fertility specialists, so BH-039 uses the stable `doctor` post type with **Doctor** / **Doctors** editor labels and GraphQL names. Native title, editor content, revisions, and featured image provide the name, biography, and portrait; the only custom field is the plain-text `doctor_role` field exposed through `doctorProfile`. Qualifications, languages, clinic/location, specialty, Doctor relationships, booking behavior, and entity SEO remain deferred to their owning tasks. The Doctor Grid remains deferred to BH-027 and frontend pages remain static.
 
+## Doctor Grid
+
+The `BrounHall Doctor Grid` ACF Free field group is attached to native Pages and exposed as `doctorGrid`. Editors select and order canonical Doctors through the `doctor_grid_doctors` Relationship field, restricted to the `doctor` post type; Doctor name, role, portrait, slug, and biography remain on the Doctor entity and are not duplicated on the Page. The section also provides source-proven plain-text title/description fields and an optional BH-019 link field. The selection is bounded and preserves editor order. Specialty/department relationships remain deferred to BH-040/BH-044, clinic/location to BH-043, entity SEO to BH-047, and the Doctor Grid frontend remains static and unmodified.
+
 ## Intentionally not implemented
 
 This release does not include additional future content types, taxonomies, ACF field groups for the Service entity, persisted queries, navigation logic, SEO settings, preview, revalidation, forms, redirects, or frontend integration.
