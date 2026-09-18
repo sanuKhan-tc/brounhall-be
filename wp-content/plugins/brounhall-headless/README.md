@@ -60,6 +60,10 @@ The `BrounHall Hero` ACF Free field group is attached to native Pages and expose
 
 The `BrounHall Rich Text` ACF Free field group is attached to native Pages and exposed through WPGraphQL for ACF as `richText`. It provides an optional plain-text title and a plain-text body textarea; blank lines separate paragraphs. Stored HTML, scripts, events, styles, embeds, and arbitrary markup are not accepted because the current frontend renders content as plain text. Frontend consumption and the page-section GraphQL fragment are deferred to BH-058; other section types remain deferred to BH-023+.
 
+## Text + Image fields
+
+The `BrounHall Text + Image` ACF Free field group is attached to native Pages and exposed through WPGraphQL for ACF as `textImage`. It provides optional eyebrow, title, and plain-text body fields plus an optional image using the BH-019 WordPress Media Library attachment-ID contract. Orientation, stacking, spacing, and other presentation choices remain frontend-owned. The current frontend has both visual split directions with the same content shape; BH-024 remains separate and undecided. Frontend consumption and the page-section GraphQL fragment are deferred to BH-058.
+
 ## Intentionally not implemented
 
 This release does not include custom post types, taxonomies, ACF field groups, GraphQL fields or persisted queries, navigation logic, SEO settings, preview, revalidation, forms, redirects, or frontend integration.
