@@ -190,7 +190,7 @@ function brounhall_sanitize_mega_menu_image( $value, $post_id, $field ) {
 }
 
 function brounhall_sanitize_mega_menu_label( $value, $post_id, $field ) {
-	return brounhall_is_primary_top_level_menu_item( $post_id ) ? substr( sanitize_text_field( (string) $value ), 0, 200 ) : '';
+	return brounhall_is_primary_top_level_menu_item( $post_id ) ? substr( trim( sanitize_text_field( (string) $value ) ), 0, 200 ) : '';
 }
 
 function brounhall_sanitize_mega_menu_link( $value, $post_id, $field ) {
