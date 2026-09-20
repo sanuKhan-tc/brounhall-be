@@ -144,6 +144,12 @@ BH-054 applies one project-owned URL policy to native menu-item URLs and the BH-
 
 Native menu labels are stored as plain text and capped at 200 characters by the project save hook. BH-052 featured labels use the same plain-text limit, featured images must be WordPress attachments, and invalid featured links are cleared as a whole rather than retaining partially unsafe data. Mega-menu metadata remains restricted to top-level items in the `primary-navigation` location; footer and nested items cannot retain it. BH-055 owns the final persistent Fertility Treatments configuration. Frontend rendering and URL normalization remain frontend responsibilities after the server-side boundary.
 
+## Representative mega-menu configuration
+
+BH-055 completes the local development navigation fixture. Primary menu ID `4`, **Fertility Treatments** item ID `70`, is enabled with the `mixed` layout. Its native child hierarchy uses group IDs `103`, `107`, and `113`, with treatment items `104–106`, `108–112`, and `114–116` respectively. The seeded labels and relative URLs follow the current frontend `treatmentsMegaMenu` source, including `Platelet Rich Plasma (PRP)` at `/treatments` and the non-navigational `Understanding Fertility` heading using `#`.
+
+The featured panel stores label **Egg Freezing** and a validated link titled **Egg Freezing** to `/treatments/egg-freezing`; the target is empty for same-window behavior. No suitable matching Media Library attachment exists locally, so `featuredImage` remains null. The configuration is development representative content, is editable through the normal WordPress menu editor, and contains no child/group ACF metadata. GraphQL exposes the three-level structure through `menuItem.childItems.nodes.childItems.nodes`; production navigation population and frontend rendering remain later integration work. Phase 4 — Navigation and Mega Menu — is complete.
+
 ## Local development
 
 - WordPress: http://brounhall-wp.local/
