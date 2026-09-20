@@ -98,14 +98,19 @@ function brounhall_sanitize_global_settings( $input ) {
  */
 function brounhall_sanitize_global_cta_link( $link ) {
 	$link   = is_array( $link ) ? $link : array();
-	$title  = is_scalar( $link['title'] ?? null ) ? (string) $link['title'] : '';
-	$url    = is_scalar( $link['url'] ?? null ) ? trim( (string) $link['url'] ) : '';
+	$title     = is_scalar( $link['title'] ?? null ) ? trim( (string) $link['title'] ) : '';
+	$raw_url   = is_scalar( $link['url'] ?? null ) ? trim( (string) $link['url'] ) : '';
 	$target = is_scalar( $link['target'] ?? null ) ? (string) $link['target'] : '';
+	$url    = brounhall_sanitize_public_url( $raw_url, true, true, false );
+
+	if ( ( '' !== $raw_url && '' === $url ) || ( '' === $raw_url && ( '' !== $title || '' !== $target ) ) ) {
+		return array();
+	}
 
 	return array(
 		'title'  => substr( sanitize_text_field( $title ), 0, 200 ),
-		'url'    => brounhall_sanitize_global_cta_url( $url ),
-		'target' => in_array( $target, array( '', '_self', '_blank' ), true ) ? $target : '',
+		'url'    => $url,
+		'target' => brounhall_sanitize_link_target( $target ),
 	);
 }
 
@@ -116,21 +121,7 @@ function brounhall_sanitize_global_cta_link( $link ) {
  * @return string
  */
 function brounhall_sanitize_global_cta_url( $url ) {
-	if ( '' === $url || '//' === substr( $url, 0, 2 ) ) {
-		return '';
-	}
-
-	if ( preg_match( '/^[a-z][a-z0-9+.-]*:/i', $url, $matches ) ) {
-		$scheme = strtolower( rtrim( $matches[0], ':' ) );
-
-		if ( ! in_array( $scheme, array( 'http', 'https', 'mailto', 'tel' ), true ) ) {
-			return '';
-		}
-	} elseif ( '/' !== substr( $url, 0, 1 ) ) {
-		return '';
-	}
-
-	return esc_url_raw( $url, array( 'http', 'https', 'mailto', 'tel' ) );
+	return brounhall_sanitize_public_url( $url, true, true, false );
 }
 
 add_action( 'admin_menu', 'brounhall_register_settings_page' );

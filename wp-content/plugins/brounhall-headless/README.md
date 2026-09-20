@@ -138,6 +138,12 @@ BH-052 attaches the BrounHall Mega Menu ACF Free field group to nav_menu_item an
 
 The group is conditionally intended for top-level items assigned to primary-navigation; ACF's menu-item location rule cannot identify menu location/depth precisely, so server-side sanitization rejects non-primary or nested menu-item values. Feature-panel copy is plain text, images use Media Library attachment IDs, and links reuse the existing controlled link sanitization. Column count, descriptions, dividers, view-all controls, and child/group fields are not implemented. BH-053 is intentionally N/A: the current Fertility Treatments source already represents group headings, child labels, URLs, hierarchy, and ordering through native menu-item fields, with no additional child semantic metadata proven. BH-054 owns broader URL hardening, and BH-055 owns representative configuration. No final mega-menu content is seeded here.
 
+## Navigation link validation
+
+BH-054 applies one project-owned URL policy to native menu-item URLs and the BH-052 featured link. Relative frontend paths may include a query string or fragment, and `#` is retained for intentionally non-navigational grouping items in the footer services menu. Absolute links require a valid `http` or `https` URL without credentials; `mailto` and `tel` remain available only to CTA-like fields that already support those schemes. Scheme-relative URLs and `javascript:`, `data:`, `vbscript:`, malformed, and control-character values are rejected. Link targets are limited to empty, `_self`, and `_blank`; a future frontend renderer must pair `_blank` with `rel="noopener noreferrer"`.
+
+Native menu labels are stored as plain text and capped at 200 characters by the project save hook. BH-052 featured labels use the same plain-text limit, featured images must be WordPress attachments, and invalid featured links are cleared as a whole rather than retaining partially unsafe data. Mega-menu metadata remains restricted to top-level items in the `primary-navigation` location; footer and nested items cannot retain it. BH-055 owns the final persistent Fertility Treatments configuration. Frontend rendering and URL normalization remain frontend responsibilities after the server-side boundary.
+
 ## Local development
 
 - WordPress: http://brounhall-wp.local/
