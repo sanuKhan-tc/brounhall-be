@@ -19,3 +19,12 @@ The `bh_doctor` CPT is the reusable doctor model. Public reads use the project A
 - `GET /wp-json/brounhall/v1/doctors/{slug}` — published doctor detail.
 
 Doctor fields are controlled structured data: role, headline, specialty, clinic, image ID/alt text, nationality, languages, areas of interest, education, and bio. Clinic values are limited to `Dubai`, `Abu Dhabi`, and `Al Ain`. The plugin seeds the doctors from the frontend project data idempotently on activation; drafts and private doctors are never public.
+
+## Clinics
+
+The `bh_clinic` CPT is the reusable clinic/location model. Public reads use:
+
+- `GET /wp-json/brounhall/v1/clinics` — published lightweight clinic list.
+- `GET /wp-json/brounhall/v1/clinics/{slug}` — published clinic detail.
+
+Clinic content is validated structured JSON containing address, phone, hours, description, and image metadata. The plugin seeds Dubai, Abu Dhabi, Al Ain, and Virtual consultation records; drafts and private clinics are never public.
