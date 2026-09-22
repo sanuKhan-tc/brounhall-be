@@ -10,7 +10,7 @@ add_action( 'admin_menu', function () {
 add_action( 'init', function () {
 	$role = get_role( 'administrator' );
 	if ( $role ) {
-		foreach ( array( 'edit_appointment', 'read_appointment', 'delete_appointment', 'edit_appointments', 'edit_others_appointments', 'publish_appointments', 'read_private_appointments', 'delete_appointments', 'delete_private_appointments', 'delete_published_appointments', 'delete_others_appointments' ) as $capability ) {
+		foreach ( array( 'edit_appointment', 'read_appointment', 'delete_appointment', 'edit_appointments', 'edit_others_appointments', 'edit_private_appointments', 'edit_published_appointments', 'publish_appointments', 'read_private_appointments', 'delete_appointments', 'delete_private_appointments', 'delete_published_appointments', 'delete_others_appointments' ) as $capability ) {
 			$role->add_cap( $capability );
 		}
 		$role->add_cap( 'brounhall_view_appointment_pii' );
