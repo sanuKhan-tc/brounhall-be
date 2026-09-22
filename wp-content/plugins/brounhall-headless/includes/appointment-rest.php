@@ -12,12 +12,17 @@ function brounhall_appointment_permission( WP_REST_Request $request ) {
 	$signature = (string) $request->get_header( 'x-bourn-hall-signature' );
 	$request_id = sanitize_text_field( (string) $request->get_header( 'x-bourn-hall-request-id' ) );
 	$body = $request->get_body();
+	if ( 'POST' === strtoupper( $request->get_method() ) ) {
+		$content_type = strtolower( trim( explode( ';', (string) $request->get_header( 'content-type' ), 2 )[0] ) );
+		if ( 'application/json' !== $content_type ) { return new WP_Error( 'brounhall_appointment_unsupported_media', 'Unsupported media type', array( 'status' => 415 ) ); }
+		if ( strlen( $body ) > 16 * KB_IN_BYTES ) { return new WP_Error( 'brounhall_appointment_body_too_large', 'Invalid request', array( 'status' => 413 ) ); }
+	}
 	if ( ! $key || ! $timestamp || ! ctype_digit( $timestamp ) || abs( time() - (int) $timestamp ) > 300 || ! preg_match( '/^[a-f0-9]{64}$/', $signature ) || ! hash_equals( hash_hmac( 'sha256', $timestamp . '.' . $body, $key ), $signature ) ) { return new WP_Error( 'brounhall_appointment_unauthorized', 'Unauthorized', array( 'status' => 401 ) ); }
 	if ( ! $request_id || get_transient( 'brounhall_appointment_request_' . md5( $request_id ) ) ) { return new WP_Error( 'brounhall_appointment_replayed', 'Request rejected', array( 'status' => 409 ) ); }
 	set_transient( 'brounhall_appointment_request_' . md5( $request_id ), 1, 10 * MINUTE_IN_SECONDS );
 	if ( 'POST' !== strtoupper( $request->get_method() ) ) { return true; }
 	$count = (int) get_transient( 'brounhall_appointment_rate_global' );
-	if ( $count >= 30 ) { return new WP_Error( 'brounhall_appointment_rate_limited', 'Too many requests', array( 'status' => 429 ) ); }
+	if ( $count >= 300 ) { return new WP_Error( 'brounhall_appointment_rate_limited', 'Too many requests', array( 'status' => 429, 'retry_after' => 900 ) ); }
 	set_transient( 'brounhall_appointment_rate_global', $count + 1, 15 * MINUTE_IN_SECONDS );
 	return true;
 }
@@ -26,14 +31,14 @@ function brounhall_create_appointment( WP_REST_Request $request ) {
 	$payload = json_decode( $request->get_body(), true );
 	if ( ! is_array( $payload ) || ! wp_verify_nonce( sanitize_text_field( (string) ( $payload['wpNonce'] ?? '' ) ), 'brounhall_create_appointment' ) ) { return new WP_Error( 'brounhall_appointment_nonce_invalid', 'Request rejected', array( 'status' => 403 ) ); }
 	$data = brounhall_appointment_validate_payload( $payload );
-	if ( is_wp_error( $data ) ) { return $data; }
+	if ( is_wp_error( $data ) ) { brounhall_appointment_security_log( 'appointment.validation_failed', $request ); return $data; }
 	$token_key = 'brounhall_appointment_token_' . md5( $data['clientToken'] );
 	$token_state = get_transient( $token_key );
-	if ( is_numeric( $token_state ) && (int) $token_state > 0 ) { return rest_ensure_response( array( 'success' => true, 'duplicate' => true ) ); }
-	if ( false !== $token_state ) { return new WP_Error( 'brounhall_appointment_duplicate', 'Request already received', array( 'status' => 409 ) ); }
+	if ( is_numeric( $token_state ) && (int) $token_state > 0 ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return rest_ensure_response( array( 'success' => true, 'duplicate' => true ) ); }
+	if ( false !== $token_state ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return new WP_Error( 'brounhall_appointment_duplicate', 'Request already received', array( 'status' => 409 ) ); }
 	$fingerprint = hash( 'sha256', strtolower( $data['email'] ) . '|' . preg_replace( '/\D+/', '', $data['phone'] ) . '|' . $data['location'] . '|' . $data['service'] . '|' . strtolower( $data['message'] ) );
 	$fingerprint_key = 'brounhall_appointment_fingerprint_' . $fingerprint;
-	if ( false !== get_transient( $fingerprint_key ) ) { return new WP_Error( 'brounhall_appointment_duplicate', 'A similar request was recently received', array( 'status' => 409 ) ); }
+	if ( false !== get_transient( $fingerprint_key ) ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return new WP_Error( 'brounhall_appointment_duplicate', 'A similar request was recently received', array( 'status' => 409 ) ); }
 	set_transient( $token_key, 'processing', 10 * MINUTE_IN_SECONDS );
 	set_transient( $fingerprint_key, 1, DAY_IN_SECONDS );
 	$data['submittedAt'] = current_time( 'mysql' );
@@ -44,10 +49,15 @@ function brounhall_create_appointment( WP_REST_Request $request ) {
 	$recipients = array_values( array_filter( $recipients, 'is_email' ) );
 	if ( $recipients && ! brounhall_appointment_is_local() ) {
 		$subject = 'New Bourn Hall appointment request';
-		$body = "Name: {$data['name']}\nEmail: {$data['email']}\nPhone: {$data['phone']}\nClinic: {$data['location']}\nTreatment: {$data['service']}\n\nMessage:\n{$data['message']}\n\nAppointment ID: {$post_id}";
+		$body = "Name: {$data['name']}\nEmail: {$data['email']}\nPhone: {$data['phone']}\nClinic: {$data['location']}\nTreatment: {$data['service']}\n\nA new appointment request was received. Appointment ID: {$post_id}";
 		wp_mail( $recipients, $subject, $body, array( 'Content-Type: text/plain; charset=UTF-8' ) );
 	}
+	brounhall_appointment_security_log( 'appointment.accepted', $request );
 	return rest_ensure_response( array( 'success' => true ) );
+}
+
+function brounhall_appointment_security_log( $event, WP_REST_Request $request ) {
+	error_log( wp_json_encode( array( 'event' => $event, 'requestId' => sanitize_text_field( (string) $request->get_header( 'x-bourn-hall-request-id' ) ) ) ) );
 }
 
 function brounhall_appointment_nonce() {
