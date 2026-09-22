@@ -11,7 +11,10 @@ function brounhall_doctor_response( $post, $full = true ) {
 	$data = brounhall_normalize_doctor_data( $data );
 	$response = array( 'id' => (int) $post->ID, 'slug' => $post->post_name, 'name' => get_the_title( $post ), 'type' => $data['type'], 'role' => $data['role'], 'clinic' => $data['clinic'] );
 	if ( ! $full ) { return $response; }
-	return array_merge( $response, array( 'headline' => $data['headline'], 'specialty' => $data['specialty'], 'image' => array( 'imageId' => $data['imageId'], 'alt' => $data['imageAlt'] ), 'nationality' => $data['nationality'], 'languages' => $data['languages'], 'areasOfInterest' => $data['areasOfInterest'], 'education' => $data['education'], 'bio' => $data['bio'] ) );
+	$media = brounhall_media_response( $data['imageId'], $data['imageAlt'] );
+	$image = array( 'imageId' => $data['imageId'], 'alt' => $data['imageAlt'] );
+	if ( $media ) { $image = array_merge( $image, $media ); }
+	return array_merge( $response, array( 'headline' => $data['headline'], 'specialty' => $data['specialty'], 'image' => $image, 'nationality' => $data['nationality'], 'languages' => $data['languages'], 'areasOfInterest' => $data['areasOfInterest'], 'education' => $data['education'], 'bio' => $data['bio'] ) );
 }
 
 function brounhall_rest_doctors() {
