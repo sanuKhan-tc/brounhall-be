@@ -2,6 +2,11 @@
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'init', 'brounhall_register_appointment_post_type' );
+add_action( 'admin_menu', function () {
+	if ( current_user_can( 'manage_options' ) ) {
+		add_menu_page( __( 'Appointments', 'brounhall-headless' ), __( 'Appointments', 'brounhall-headless' ), 'manage_options', 'edit.php?post_type=bh_appointment', '', 'dashicons-calendar-alt', 26 );
+	}
+}, 30 );
 add_action( 'init', function () {
 	$role = get_role( 'administrator' );
 	if ( $role ) { $role->add_cap( 'brounhall_view_appointment_pii' ); }
@@ -13,6 +18,7 @@ function brounhall_register_appointment_post_type() {
 		'public' => false,
 		'publicly_queryable' => false,
 		'show_ui' => true,
+		'show_in_menu' => false,
 		'show_in_rest' => false,
 		'rewrite' => false,
 		'query_var' => false,
