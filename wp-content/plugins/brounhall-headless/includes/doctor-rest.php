@@ -1,0 +1,28 @@
+<?php
+defined( 'ABSPATH' ) || exit;
+
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'brounhall/v1', '/doctors', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_rest_doctors', 'permission_callback' => '__return_true' ) );
+	register_rest_route( 'brounhall/v1', '/doctors/(?P<slug>[^/]+)', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_rest_doctor', 'permission_callback' => '__return_true' ) );
+} );
+
+function brounhall_doctor_response( $post, $full = true ) {
+	$data = json_decode( get_post_meta( $post->ID, '_brounhall_doctor_data', true ), true );
+	$data = brounhall_normalize_doctor_data( $data );
+	$response = array( 'id' => (int) $post->ID, 'slug' => $post->post_name, 'name' => get_the_title( $post ), 'role' => $data['role'], 'clinic' => $data['clinic'] );
+	if ( ! $full ) { return $response; }
+	return array_merge( $response, array( 'headline' => $data['headline'], 'specialty' => $data['specialty'], 'image' => array( 'imageId' => $data['imageId'], 'alt' => $data['imageAlt'] ), 'nationality' => $data['nationality'], 'languages' => $data['languages'], 'areasOfInterest' => $data['areasOfInterest'], 'education' => $data['education'], 'bio' => $data['bio'] ) );
+}
+
+function brounhall_rest_doctors() {
+	$query = new WP_Query( array( 'post_type' => 'bh_doctor', 'post_status' => 'publish', 'posts_per_page' => 100, 'orderby' => array( 'menu_order' => 'ASC', 'title' => 'ASC' ), 'no_found_rows' => true ) );
+	return rest_ensure_response( array( 'items' => array_map( function ( $post ) { return brounhall_doctor_response( $post, false ); }, $query->posts ) ) );
+}
+
+function brounhall_rest_doctor( WP_REST_Request $request ) {
+	$slug = (string) $request['slug'];
+	if ( ! brounhall_doctor_slug_is_valid( $slug ) ) { return new WP_Error( 'brounhall_invalid_doctor_slug', 'Invalid doctor slug', array( 'status' => 400 ) ); }
+	$post = get_page_by_path( $slug, OBJECT, 'bh_doctor' );
+	if ( ! $post || 'publish' !== $post->post_status ) { return new WP_Error( 'brounhall_doctor_not_found', 'Doctor not found', array( 'status' => 404 ) ); }
+	return rest_ensure_response( brounhall_doctor_response( $post ) );
+}

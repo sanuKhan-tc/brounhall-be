@@ -14,5 +14,11 @@ require_once BROUNHALL_HEADLESS_DIR . 'includes/treatment-post-type.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/treatment-fields.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/treatment-rest.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/treatment-seeder.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/doctor-validator.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/doctor-post-type.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/doctor-fields.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/doctor-rest.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/doctor-seeder.php';
 
 register_activation_hook( __FILE__, 'brounhall_seed_treatments' );
+register_activation_hook( __FILE__, 'brounhall_seed_doctors' );
