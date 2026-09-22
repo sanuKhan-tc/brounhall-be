@@ -23,5 +23,14 @@ function brounhall_rest_treatment( WP_REST_Request $request ) {
 	$data['id'] = (int) $post->ID;
 	$data['slug'] = $post->post_name;
 	$data['title'] = get_the_title( $post );
+	if ( ! empty( $data['hero']['media']['imageId'] ) ) {
+		$media = brounhall_media_response( $data['hero']['media']['imageId'], $data['hero']['media']['alt'] ?? '' );
+		if ( $media ) { $data['hero']['media'] = array_merge( $data['hero']['media'], $media ); }
+	}
+	foreach ( $data['relatedTreatments']['items'] ?? array() as $index => $item ) {
+		$image_id = $item['media']['imageId'] ?? 0;
+		$media = brounhall_media_response( $image_id, $item['media']['alt'] ?? '' );
+		if ( $media ) { $data['relatedTreatments']['items'][ $index ]['media'] = array_merge( $item['media'], $media ); }
+	}
 	return rest_ensure_response( array_merge( array( 'id' => $data['id'], 'slug' => $data['slug'], 'title' => $data['title'] ), $data ) );
 }
