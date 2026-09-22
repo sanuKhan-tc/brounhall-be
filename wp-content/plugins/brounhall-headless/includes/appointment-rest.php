@@ -36,20 +36,31 @@ function brounhall_create_appointment( WP_REST_Request $request ) {
 	$token_state = get_transient( $token_key );
 	if ( is_numeric( $token_state ) && (int) $token_state > 0 ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return rest_ensure_response( array( 'success' => true, 'duplicate' => true ) ); }
 	if ( false !== $token_state ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return new WP_Error( 'brounhall_appointment_duplicate', 'Request already received', array( 'status' => 409 ) ); }
-	$fingerprint = hash( 'sha256', strtolower( $data['email'] ) . '|' . preg_replace( '/\D+/', '', $data['phone'] ) . '|' . $data['location'] . '|' . $data['service'] . '|' . strtolower( $data['message'] ) );
+	try { $fingerprint = brounhall_appointment_key_provider()->blind_index( 'duplicate', strtolower( $data['email'] ) . '|' . preg_replace( '/\D+/', '', $data['phone'] ) . '|' . $data['location'] . '|' . $data['service'] . '|' . strtolower( $data['message'] ) ); } catch ( Throwable $error ) { return new WP_Error( 'brounhall_appointment_crypto_unavailable', 'Appointment could not be secured', array( 'status' => 503 ) ); }
 	$fingerprint_key = 'brounhall_appointment_fingerprint_' . $fingerprint;
 	if ( false !== get_transient( $fingerprint_key ) ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return new WP_Error( 'brounhall_appointment_duplicate', 'A similar request was recently received', array( 'status' => 409 ) ); }
 	set_transient( $token_key, 'processing', 10 * MINUTE_IN_SECONDS );
 	set_transient( $fingerprint_key, 1, DAY_IN_SECONDS );
 	$data['submittedAt'] = current_time( 'mysql' );
-	$post_id = wp_insert_post( array( 'post_type' => 'bh_appointment', 'post_status' => 'private', 'post_title' => 'Appointment: ' . $data['name'], 'meta_input' => array( '_brounhall_appointment_data' => wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ), true );
+	$reference = brounhall_appointment_reference();
+	$payload = $data;
+	unset( $payload['clientToken'] );
+	try { $envelope = brounhall_appointment_envelope( $reference, $payload ); } catch ( Throwable $error ) { delete_transient( $token_key ); delete_transient( $fingerprint_key ); return new WP_Error( 'brounhall_appointment_crypto_unavailable', 'Appointment could not be secured', array( 'status' => 503 ) ); }
+	$meta = array(
+		'_bh_appointment_ref' => $reference, '_bh_appointment_status' => 'new', '_bh_created_at' => current_time( 'mysql' ), '_bh_migration_version' => 1,
+		'_bh_pii_ciphertext' => $envelope['ciphertext'], '_bh_pii_nonce' => $envelope['nonce'], '_bh_pii_salt' => $envelope['salt'], '_bh_wrapped_dek' => $envelope['wrapped_dek'],
+		'_bh_crypto_algorithm' => $envelope['algorithm'], '_bh_crypto_version' => $envelope['crypto_version'], '_bh_kek_id' => $envelope['kek_id'],
+		'_bh_email_blind_index' => $envelope['email_index'], '_bh_email_index_version' => $envelope['email_index_version'], '_bh_phone_blind_index' => $envelope['phone_index'], '_bh_phone_index_version' => $envelope['phone_index_version'],
+	);
+	$post_id = wp_insert_post( array( 'post_type' => 'bh_appointment', 'post_status' => 'private', 'post_title' => $reference, 'meta_input' => $meta ), true );
 	if ( is_wp_error( $post_id ) ) { delete_transient( $token_key ); delete_transient( $fingerprint_key ); return new WP_Error( 'brounhall_appointment_failed', 'Appointment could not be saved', array( 'status' => 500 ) ); }
+	try { $verified = brounhall_appointment_decrypt( $reference, brounhall_appointment_read_envelope( $post_id ) ); if ( $verified !== $payload ) { throw new RuntimeException( 'Appointment read-back verification failed' ); } } catch ( Throwable $error ) { wp_delete_post( $post_id, true ); delete_transient( $token_key ); delete_transient( $fingerprint_key ); return new WP_Error( 'brounhall_appointment_failed', 'Appointment could not be saved', array( 'status' => 500 ) ); }
 	set_transient( $token_key, (int) $post_id, 10 * MINUTE_IN_SECONDS );
 	$recipients = preg_split( '/\s+/', (string) get_option( 'brounhall_appointment_recipients', '' ), -1, PREG_SPLIT_NO_EMPTY );
 	$recipients = array_values( array_filter( $recipients, 'is_email' ) );
 	if ( $recipients && ! brounhall_appointment_is_local() ) {
 		$subject = 'New Bourn Hall appointment request';
-		$body = "Name: {$data['name']}\nEmail: {$data['email']}\nPhone: {$data['phone']}\nClinic: {$data['location']}\nTreatment: {$data['service']}\n\nA new appointment request was received. Appointment ID: {$post_id}";
+		$body = "A new appointment request was received.\n\nReference: {$reference}\nReceived: {$data['submittedAt']}\n\nOpen the secured WordPress admin area to view the appointment.";
 		wp_mail( $recipients, $subject, $body, array( 'Content-Type: text/plain; charset=UTF-8' ) );
 	}
 	brounhall_appointment_security_log( 'appointment.accepted', $request );
