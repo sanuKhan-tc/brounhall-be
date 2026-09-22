@@ -30,3 +30,7 @@ The `bh_clinic` CPT is the reusable clinic/location model. Public reads use:
 - `GET /wp-json/brounhall/v1/clinics/{slug}` — published clinic detail.
 
 Clinic content is validated structured JSON containing address, phone, hours, description, and image metadata. The plugin seeds Dubai, Abu Dhabi, Al Ain, and Virtual consultation records; drafts and private clinics are never public.
+
+## Structured Pages
+
+The plugin seeds the published `success-rates` WordPress Page using the same versioned YAML-in-code-block contract used by Home and About. The frontend consumes it through its server-only page loader and keeps static content as a safe fallback.
