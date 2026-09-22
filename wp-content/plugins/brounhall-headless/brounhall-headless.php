@@ -25,6 +25,7 @@ require_once BROUNHALL_HEADLESS_DIR . 'includes/clinic-fields.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/clinic-rest.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/clinic-seeder.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/page-seeder.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/cost-seeder.php';
 
 register_activation_hook( __FILE__, 'brounhall_seed_treatments' );
 register_activation_hook( __FILE__, 'brounhall_seed_doctors' );
