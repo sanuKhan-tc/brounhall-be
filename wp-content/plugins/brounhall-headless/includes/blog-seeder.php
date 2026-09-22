@@ -1,0 +1,4 @@
+<?php
+defined( 'ABSPATH' ) || exit;
+
+function brounhall_seed_blogs() { $data = require BROUNHALL_HEADLESS_DIR . 'includes/blog-seed-data.php'; foreach ( $data as $order => $blog ) { $slug = sanitize_title( $blog['slug'] ); $existing = get_page_by_path( $slug, OBJECT, 'post' ); $post_id = $existing ? $existing->ID : wp_insert_post( array( 'post_type' => 'post', 'post_status' => 'publish', 'post_title' => sanitize_text_field( $blog['title'] ), 'post_name' => $slug, 'post_content' => '', 'menu_order' => $order ), true ); if ( is_wp_error( $post_id ) ) { continue; } wp_update_post( array( 'ID' => $post_id, 'menu_order' => $order ) ); update_post_meta( $post_id, '_brounhall_blog_data', wp_json_encode( brounhall_normalize_blog_data( $blog ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ); update_post_meta( $post_id, '_brounhall_is_blog', '1' ); } }
