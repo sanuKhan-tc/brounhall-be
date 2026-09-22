@@ -69,3 +69,19 @@ The `bh_appointment` record type stores submitted appointment requests privately
 The browser posts only to the Next.js `/api/appointments` route. Next.js validates the payload and signs the request; WordPress accepts only fresh, signed requests, validates and sanitizes every field, applies replay/rate limits, stores the private appointment, and sends plain-text notifications to the configured recipients. There is no public appointment listing or public WordPress mutation endpoint.
 
 On local WordPress environments, records are still saved but email delivery is intentionally skipped. WP Engine, staging, and production environments use the configured `wp_mail` transport.
+
+Appointment PII is encrypted with XChaCha20-Poly1305 using a random per-record DEK, salt, nonce and versioned wrapped key. Name, email, phone, clinic, treatment, message and consent are kept in the encrypted payload; email and phone use separate HMAC blind-index keys. Keys are server-only environment values and are never stored in WordPress.
+
+Required environment values are `BOURNHALL_APPOINTMENT_KEK` (base64 32-byte key), `BOURNHALL_APPOINTMENT_EMAIL_INDEX_KEY`, `BOURNHALL_APPOINTMENT_PHONE_INDEX_KEY`, and `BOURNHALL_APPOINTMENT_DUPLICATE_KEY`. Production KMS integration is still an infrastructure requirement.
+
+Use WP-CLI for controlled migration and verification:
+
+```text
+wp brounhall appointments encrypt-migrate --dry-run
+wp brounhall appointments encrypt-migrate --batch-size=50
+wp brounhall appointments crypto-verify
+wp brounhall appointments crypto-rewrap --from-key=appointment-kek-v1 --to-key=appointment-kek-v2 --dry-run
+wp brounhall appointments crypto-reencrypt --dry-run
+```
+
+Migration verifies read-back decryption before removing `_brounhall_appointment_data`. Failed records retain legacy data for manual remediation. Backups, restore testing, production key configuration, privacy approval and a final plaintext scan are required before production execution.

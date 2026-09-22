@@ -2,6 +2,10 @@
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'init', 'brounhall_register_appointment_post_type' );
+add_action( 'init', function () {
+	$role = get_role( 'administrator' );
+	if ( $role ) { $role->add_cap( 'brounhall_view_appointment_pii' ); }
+}, 20 );
 
 function brounhall_register_appointment_post_type() {
 	register_post_type( 'bh_appointment', array(
