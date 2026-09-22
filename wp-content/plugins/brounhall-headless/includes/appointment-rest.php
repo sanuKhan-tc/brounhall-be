@@ -1,7 +1,10 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-add_action( 'rest_api_init', function () { register_rest_route( 'brounhall/v1', '/appointments', array( 'methods' => WP_REST_Server::CREATABLE, 'callback' => 'brounhall_create_appointment', 'permission_callback' => 'brounhall_appointment_permission' ) ); } );
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'brounhall/v1', '/appointments', array( 'methods' => WP_REST_Server::CREATABLE, 'callback' => 'brounhall_create_appointment', 'permission_callback' => 'brounhall_appointment_permission' ) );
+	register_rest_route( 'brounhall/v1', '/appointments/nonce', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_appointment_nonce', 'permission_callback' => 'brounhall_appointment_permission' ) );
+} );
 
 function brounhall_appointment_permission( WP_REST_Request $request ) {
 	$key = (string) get_option( 'brounhall_appointment_api_key', '' );
@@ -12,6 +15,7 @@ function brounhall_appointment_permission( WP_REST_Request $request ) {
 	if ( ! $key || ! $timestamp || ! ctype_digit( $timestamp ) || abs( time() - (int) $timestamp ) > 300 || ! preg_match( '/^[a-f0-9]{64}$/', $signature ) || ! hash_equals( hash_hmac( 'sha256', $timestamp . '.' . $body, $key ), $signature ) ) { return new WP_Error( 'brounhall_appointment_unauthorized', 'Unauthorized', array( 'status' => 401 ) ); }
 	if ( ! $request_id || get_transient( 'brounhall_appointment_request_' . md5( $request_id ) ) ) { return new WP_Error( 'brounhall_appointment_replayed', 'Request rejected', array( 'status' => 409 ) ); }
 	set_transient( 'brounhall_appointment_request_' . md5( $request_id ), 1, 10 * MINUTE_IN_SECONDS );
+	if ( 'POST' !== strtoupper( $request->get_method() ) ) { return true; }
 	$count = (int) get_transient( 'brounhall_appointment_rate_global' );
 	if ( $count >= 30 ) { return new WP_Error( 'brounhall_appointment_rate_limited', 'Too many requests', array( 'status' => 429 ) ); }
 	set_transient( 'brounhall_appointment_rate_global', $count + 1, 15 * MINUTE_IN_SECONDS );
@@ -20,11 +24,22 @@ function brounhall_appointment_permission( WP_REST_Request $request ) {
 
 function brounhall_create_appointment( WP_REST_Request $request ) {
 	$payload = json_decode( $request->get_body(), true );
+	if ( ! is_array( $payload ) || ! wp_verify_nonce( sanitize_text_field( (string) ( $payload['wpNonce'] ?? '' ) ), 'brounhall_create_appointment' ) ) { return new WP_Error( 'brounhall_appointment_nonce_invalid', 'Request rejected', array( 'status' => 403 ) ); }
 	$data = brounhall_appointment_validate_payload( $payload );
 	if ( is_wp_error( $data ) ) { return $data; }
+	$token_key = 'brounhall_appointment_token_' . md5( $data['clientToken'] );
+	$token_state = get_transient( $token_key );
+	if ( is_numeric( $token_state ) && (int) $token_state > 0 ) { return rest_ensure_response( array( 'success' => true, 'duplicate' => true ) ); }
+	if ( false !== $token_state ) { return new WP_Error( 'brounhall_appointment_duplicate', 'Request already received', array( 'status' => 409 ) ); }
+	$fingerprint = hash( 'sha256', strtolower( $data['email'] ) . '|' . preg_replace( '/\D+/', '', $data['phone'] ) . '|' . $data['location'] . '|' . $data['service'] . '|' . strtolower( $data['message'] ) );
+	$fingerprint_key = 'brounhall_appointment_fingerprint_' . $fingerprint;
+	if ( false !== get_transient( $fingerprint_key ) ) { return new WP_Error( 'brounhall_appointment_duplicate', 'A similar request was recently received', array( 'status' => 409 ) ); }
+	set_transient( $token_key, 'processing', 10 * MINUTE_IN_SECONDS );
+	set_transient( $fingerprint_key, 1, DAY_IN_SECONDS );
 	$data['submittedAt'] = current_time( 'mysql' );
 	$post_id = wp_insert_post( array( 'post_type' => 'bh_appointment', 'post_status' => 'private', 'post_title' => 'Appointment: ' . $data['name'], 'meta_input' => array( '_brounhall_appointment_data' => wp_json_encode( $data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) ), true );
-	if ( is_wp_error( $post_id ) ) { return new WP_Error( 'brounhall_appointment_failed', 'Appointment could not be saved', array( 'status' => 500 ) ); }
+	if ( is_wp_error( $post_id ) ) { delete_transient( $token_key ); delete_transient( $fingerprint_key ); return new WP_Error( 'brounhall_appointment_failed', 'Appointment could not be saved', array( 'status' => 500 ) ); }
+	set_transient( $token_key, (int) $post_id, 10 * MINUTE_IN_SECONDS );
 	$recipients = preg_split( '/\s+/', (string) get_option( 'brounhall_appointment_recipients', '' ), -1, PREG_SPLIT_NO_EMPTY );
 	$recipients = array_values( array_filter( $recipients, 'is_email' ) );
 	if ( $recipients && ! brounhall_appointment_is_local() ) {
@@ -33,6 +48,10 @@ function brounhall_create_appointment( WP_REST_Request $request ) {
 		wp_mail( $recipients, $subject, $body, array( 'Content-Type: text/plain; charset=UTF-8' ) );
 	}
 	return rest_ensure_response( array( 'success' => true ) );
+}
+
+function brounhall_appointment_nonce() {
+	return rest_ensure_response( array( 'nonce' => wp_create_nonce( 'brounhall_create_appointment' ) ) );
 }
 
 function brounhall_appointment_is_local() {
