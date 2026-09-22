@@ -34,3 +34,7 @@ Clinic content is validated structured JSON containing address, phone, hours, de
 ## Structured Pages
 
 The plugin seeds the published `success-rates` WordPress Page using the same versioned YAML-in-code-block contract used by Home and About. The frontend consumes it through its server-only page loader and keeps static content as a safe fallback.
+
+## Cost Pages
+
+The cost module seeds the published `finance`, `insurance`, and `packages` Pages with the current structured content. The frontend reads these through the existing WordPress Page REST contract and maps the `financing_options`, `insurance_providers`, and `packages` sections into the existing components. Static content remains a fallback during migration.
