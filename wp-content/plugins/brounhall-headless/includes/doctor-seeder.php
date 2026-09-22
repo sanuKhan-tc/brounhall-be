@@ -9,6 +9,21 @@ function brounhall_seed_doctor( $doctor ) {
 	return (int) $id;
 }
 
+function brounhall_seed_embryologists() {
+	$members = array(
+		array( 'order' => 1, 'slug' => 'geraldine-emerson', 'name' => 'Geraldine Emerson', 'type' => 'embryologist', 'role' => 'Group Laboratory Director', 'clinic' => 'Dubai' ),
+		array( 'order' => 2, 'slug' => 'linda-bouhafs', 'name' => 'Linda Bouhafs', 'type' => 'embryologist', 'role' => 'Laboratory Operations Director', 'clinic' => 'Abu Dhabi' ),
+		array( 'order' => 3, 'slug' => 'eman-ahmad', 'name' => 'Eman Ahmad', 'type' => 'embryologist', 'role' => 'Laboratory Manager', 'clinic' => 'Dubai' ),
+		array( 'order' => 4, 'slug' => 'dalya-hassan', 'name' => 'Dalya Hassan', 'type' => 'embryologist', 'role' => 'Laboratory Manager', 'clinic' => 'Abu Dhabi' ),
+		array( 'order' => 5, 'slug' => 'ruba-najjar', 'name' => 'Ruba Najjar', 'type' => 'embryologist', 'role' => 'Senior Clinical Embryologist', 'clinic' => 'Dubai' ),
+		array( 'order' => 6, 'slug' => 'madiha-mustafa', 'name' => 'Madiha Mustafa', 'type' => 'embryologist', 'role' => 'Senior Clinical Embryologist', 'clinic' => 'Dubai' ),
+		array( 'order' => 7, 'slug' => 'sanaa-maalouf', 'name' => 'Sanaa Maalouf', 'type' => 'embryologist', 'role' => 'Senior Clinical Embryologist', 'clinic' => 'Abu Dhabi' ),
+		array( 'order' => 8, 'slug' => 'ahmed-mohammed-nasr', 'name' => 'Ahmed Mohammed Nasr', 'type' => 'embryologist', 'role' => 'Senior Clinical Embryologist', 'clinic' => 'Al Ain' ),
+		array( 'order' => 9, 'slug' => 'sami-elhadi', 'name' => 'Sami Elhadi', 'type' => 'embryologist', 'role' => 'Medical Laboratory Technologist', 'clinic' => 'Dubai' ),
+	);
+	foreach ( $members as $member ) { brounhall_seed_doctor( $member ); }
+}
+
 function brounhall_seed_doctors() {
 	$doctors = array(
 		array( 'order' => 1, 'slug' => 'dr-ghada-hussein', 'name' => 'Dr. Ghada Hussein', 'role' => 'Medical Director', 'headline' => 'Medical Director, Consultant in Reproductive Medicine and Infertility', 'specialty' => 'Consultant, Reproductive Medicine', 'clinic' => 'Abu Dhabi', 'imageAlt' => 'Dr. Ghada Hussein', 'nationality' => 'Swedish, Iraqi', 'languages' => 'Arabic, English, Swedish fluently', 'areasOfInterest' => 'Infertility challenges including poor ovarian reserve, severe male factor infertility, severe PCOS with amenorrhoea and repeated failures, as well as endometriosis and helping families with history of genetic disorders. Uterine factor infertility including fibroids with a novel and new surgical procedure that was first introduced in UAE by Dr. Ghada Hussein using radio frequency ablation. Psychological wellbeing of couples undergoing infertility treatment.', 'education' => 'Fellowship gained from Gothenburg University, Sweden (PhD) in Reproductive Physiology. Swedish board of Obstetrics and Gynaecology. GMC licensed physician in UK.', 'bio' => 'Dr. Ghada Hussein is the medical director of Bourn Hall IVF clinic in Abu Dhabi. She is a senior consultant OBGYN with more than 25 years of experience in reproductive endocrinology and infertility covering both the clinical and laboratory part of the field. She has worked in many countries including Iraq, Jordan, Qatar and Sweden and was the medical director of an IVF clinic in Stockholm.' ),

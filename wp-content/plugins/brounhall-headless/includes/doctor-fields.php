@@ -7,7 +7,7 @@ add_action( 'save_post_bh_doctor', 'brounhall_save_doctor_data', 10, 2 );
 function brounhall_doctor_meta_box( $post ) {
 	wp_nonce_field( 'brounhall_save_doctor', 'brounhall_doctor_nonce' );
 	$value = get_post_meta( $post->ID, '_brounhall_doctor_data', true );
-	$value = $value ? wp_json_encode( json_decode( $value, true ), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) : "{\n  \"role\": \"\",\n  \"headline\": \"\",\n  \"specialty\": \"\",\n  \"clinic\": \"Dubai\",\n  \"imageId\": 0,\n  \"imageAlt\": \"\",\n  \"nationality\": \"\",\n  \"languages\": \"\",\n  \"areasOfInterest\": \"\",\n  \"education\": \"\",\n  \"bio\": \"\"\n}";
+	$value = $value ? wp_json_encode( json_decode( $value, true ), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) : "{\n  \"type\": \"doctor\",\n  \"role\": \"\",\n  \"headline\": \"\",\n  \"specialty\": \"\",\n  \"clinic\": \"Dubai\",\n  \"imageId\": 0,\n  \"imageAlt\": \"\",\n  \"nationality\": \"\",\n  \"languages\": \"\",\n  \"areasOfInterest\": \"\",\n  \"education\": \"\",\n  \"bio\": \"\"\n}";
 	echo '<p>' . esc_html__( 'Enter the controlled doctor schema as JSON. HTML is rejected; clinic must be Dubai, Abu Dhabi, or Al Ain.', 'brounhall-headless' ) . '</p><textarea name="brounhall_doctor_data" rows="25" style="width:100%;font-family:monospace">' . esc_textarea( $value ) . '</textarea>';
 }
 

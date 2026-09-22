@@ -10,11 +10,17 @@ function brounhall_doctor_text( $value, $limit = 8000 ) {
 	return substr( $value, 0, $limit );
 }
 
+function brounhall_doctor_type_is_valid( $type ) {
+	return in_array( $type, array( 'doctor', 'embryologist' ), true );
+}
+
 function brounhall_normalize_doctor_data( $data ) {
 	$data = is_array( $data ) ? $data : array();
+	$type = brounhall_doctor_type_is_valid( $data['type'] ?? '' ) ? $data['type'] : 'doctor';
 	$clinic = $data['clinic'] ?? '';
 	$clinic = in_array( $clinic, array( 'Dubai', 'Abu Dhabi', 'Al Ain' ), true ) ? $clinic : '';
 	return array(
+		'type'             => $type,
 		'role'             => brounhall_doctor_text( $data['role'] ?? '', 200 ),
 		'headline'         => brounhall_doctor_text( $data['headline'] ?? '', 300 ),
 		'specialty'        => brounhall_doctor_text( $data['specialty'] ?? '', 200 ),
