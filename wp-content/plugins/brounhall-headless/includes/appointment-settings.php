@@ -18,7 +18,7 @@ function brounhall_appointment_settings_page() {
 	$recipients = get_option( 'brounhall_appointment_recipients', '' );
 	$key = get_option( 'brounhall_appointment_api_key', '' );
 	?>
-	<div class="wrap"><h1>Bourn Hall Appointments</h1><form method="post" action="options.php">
+	<div class="wrap"><h1>Bourn Hall Appointments</h1><?php if ( function_exists( 'brounhall_appointment_is_local' ) && brounhall_appointment_is_local() ) : ?><div class="notice notice-info"><p>Email notifications are disabled on this local WordPress environment. Appointment records will still be saved.</p></div><?php endif; ?><form method="post" action="options.php">
 		<?php settings_fields( 'brounhall_appointments' ); ?>
 		<table class="form-table" role="presentation">
 			<tr><th scope="row"><label for="brounhall_appointment_recipients">Notification recipients</label></th><td><textarea class="large-text" rows="5" id="brounhall_appointment_recipients" name="brounhall_appointment_recipients"><?php echo esc_textarea( $recipients ); ?></textarea><p class="description">One email address per line. New appointment notifications are sent to these addresses.</p></td></tr>
