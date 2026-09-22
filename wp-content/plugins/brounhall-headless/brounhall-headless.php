@@ -26,6 +26,10 @@ require_once BROUNHALL_HEADLESS_DIR . 'includes/clinic-rest.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/clinic-seeder.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/page-seeder.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/cost-seeder.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/blog-validator.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/blog-post-type.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/blog-rest.php';
+require_once BROUNHALL_HEADLESS_DIR . 'includes/blog-seeder.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/appointment-validator.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/appointment-post-type.php';
 require_once BROUNHALL_HEADLESS_DIR . 'includes/appointment-fields.php';
@@ -41,3 +45,9 @@ add_action( 'init', function () {
 	}
 }, 20 );
 register_activation_hook( __FILE__, 'brounhall_seed_clinics' );
+add_action( 'init', function () {
+	if ( '3' !== get_option( 'brounhall_blogs_seeded' ) ) {
+		brounhall_seed_blogs();
+		update_option( 'brounhall_blogs_seeded', '3', false );
+	}
+}, 20 );
