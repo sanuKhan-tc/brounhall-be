@@ -10,13 +10,16 @@ function brounhall_clinic_response( $post, $full = true ) {
 	$data = brounhall_normalize_clinic_data( json_decode( get_post_meta( $post->ID, '_brounhall_clinic_data', true ), true ) );
 	$response = array( 'id' => (int) $post->ID, 'slug' => $post->post_name, 'name' => get_the_title( $post ) );
 	if ( ! $full ) { return $response; }
+	$image = array( 'imageId' => $data['imageId'], 'alt' => $data['imageAlt'] );
+	$media = brounhall_media_response( $data['imageId'], $data['imageAlt'] );
+	if ( $media ) { $image = array_merge( $image, $media ); }
 	return array_merge( $response, array(
 		'title'       => $data['title'] ? $data['title'] : get_the_title( $post ),
 		'address'     => $data['address'],
 		'phone'       => $data['phone'],
 		'hours'       => $data['hours'],
 		'description' => $data['description'],
-		'image'       => array( 'imageId' => $data['imageId'], 'alt' => $data['imageAlt'] ),
+		'image'       => $image,
 	) );
 }
 

@@ -40,6 +40,20 @@ The `bh_faq` CPT stores the FAQ page content as validated structured JSON. Publi
 
 The seeded record contains the current help card, category accordions, and question-and-answer items. Draft and private FAQ records are never returned anonymously.
 
+## Media
+
+Images are stored in the WordPress Media Library and referenced by attachment ID. The project-owned media endpoint returns validated public image metadata:
+
+- `GET /wp-json/brounhall/v1/media/{id}`
+
+Local migration imports the existing frontend raster assets with:
+
+```text
+php backend/tools/import-frontend-images.php
+```
+
+The importer is idempotent, records the original frontend-relative path on each attachment, and imports the existing Unsplash-backed raster sources used by the frontend into WordPress as local JPEG assets. SVG UI illustrations are intentionally not imported as editorial media.
+
 ## Structured Pages
 
 The plugin seeds the published `success-rates` WordPress Page using the same versioned YAML-in-code-block contract used by Home and About. The frontend consumes it through its server-only page loader and keeps static content as a safe fallback.
