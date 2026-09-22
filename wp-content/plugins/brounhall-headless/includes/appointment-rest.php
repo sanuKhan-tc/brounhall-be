@@ -27,10 +27,16 @@ function brounhall_create_appointment( WP_REST_Request $request ) {
 	if ( is_wp_error( $post_id ) ) { return new WP_Error( 'brounhall_appointment_failed', 'Appointment could not be saved', array( 'status' => 500 ) ); }
 	$recipients = preg_split( '/\s+/', (string) get_option( 'brounhall_appointment_recipients', '' ), -1, PREG_SPLIT_NO_EMPTY );
 	$recipients = array_values( array_filter( $recipients, 'is_email' ) );
-	if ( $recipients ) {
+	if ( $recipients && ! brounhall_appointment_is_local() ) {
 		$subject = 'New Bourn Hall appointment request';
 		$body = "Name: {$data['name']}\nEmail: {$data['email']}\nPhone: {$data['phone']}\nClinic: {$data['location']}\nTreatment: {$data['service']}\n\nMessage:\n{$data['message']}\n\nAppointment ID: {$post_id}";
 		wp_mail( $recipients, $subject, $body, array( 'Content-Type: text/plain; charset=UTF-8' ) );
 	}
 	return rest_ensure_response( array( 'success' => true ) );
+}
+
+function brounhall_appointment_is_local() {
+	$environment = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : '';
+	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	return 'local' === $environment || in_array( $host, array( 'localhost', '127.0.0.1', '::1' ), true ) || (bool) preg_match( '/\.local$/i', $host );
 }

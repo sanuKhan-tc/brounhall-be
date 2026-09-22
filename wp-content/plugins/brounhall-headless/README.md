@@ -44,3 +44,5 @@ The cost module seeds the published `finance`, `insurance`, and `packages` Pages
 The `bh_appointment` record type stores submitted appointment requests privately in WordPress. Admins configure notification recipients and the proxy signing key under **Settings → Bourn Hall Appointments**. Set the same key as the server-only Next.js `WORDPRESS_APPOINTMENT_API_KEY`; it must never be a `NEXT_PUBLIC_*` variable.
 
 The browser posts only to the Next.js `/api/appointments` route. Next.js validates the payload and signs the request; WordPress accepts only fresh, signed requests, validates and sanitizes every field, applies replay/rate limits, stores the private appointment, and sends plain-text notifications to the configured recipients. There is no public appointment listing or public WordPress mutation endpoint.
+
+On local WordPress environments, records are still saved but email delivery is intentionally skipped. WP Engine, staging, and production environments use the configured `wp_mail` transport.
