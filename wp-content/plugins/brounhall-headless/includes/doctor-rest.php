@@ -9,13 +9,16 @@ add_action( 'rest_api_init', function () {
 function brounhall_doctor_response( $post, $full = true ) {
 	$data = json_decode( get_post_meta( $post->ID, '_brounhall_doctor_data', true ), true );
 	$data = brounhall_normalize_doctor_data( $data );
-	$response = array( 'id' => (int) $post->ID, 'slug' => $post->post_name, 'name' => get_the_title( $post ), 'role' => $data['role'], 'clinic' => $data['clinic'] );
+	$response = array( 'id' => (int) $post->ID, 'slug' => $post->post_name, 'name' => get_the_title( $post ), 'type' => $data['type'], 'role' => $data['role'], 'clinic' => $data['clinic'] );
 	if ( ! $full ) { return $response; }
 	return array_merge( $response, array( 'headline' => $data['headline'], 'specialty' => $data['specialty'], 'image' => array( 'imageId' => $data['imageId'], 'alt' => $data['imageAlt'] ), 'nationality' => $data['nationality'], 'languages' => $data['languages'], 'areasOfInterest' => $data['areasOfInterest'], 'education' => $data['education'], 'bio' => $data['bio'] ) );
 }
 
 function brounhall_rest_doctors() {
-	$query = new WP_Query( array( 'post_type' => 'bh_doctor', 'post_status' => 'publish', 'posts_per_page' => 100, 'orderby' => array( 'menu_order' => 'ASC', 'title' => 'ASC' ), 'no_found_rows' => true ) );
+	$type = isset( $_GET['type'] ) ? sanitize_key( wp_unslash( $_GET['type'] ) ) : '';
+	if ( $type && ! brounhall_doctor_type_is_valid( $type ) ) { return new WP_Error( 'brounhall_invalid_doctor_type', 'Invalid doctor type', array( 'status' => 400 ) ); }
+	$meta_query = $type ? array( array( 'key' => '_brounhall_doctor_data', 'value' => '"type":"' . $type . '"', 'compare' => 'LIKE' ) ) : array();
+	$query = new WP_Query( array( 'post_type' => 'bh_doctor', 'post_status' => 'publish', 'posts_per_page' => 100, 'orderby' => array( 'menu_order' => 'ASC', 'title' => 'ASC' ), 'no_found_rows' => true, 'meta_query' => $meta_query ) );
 	return rest_ensure_response( array( 'items' => array_map( function ( $post ) { return brounhall_doctor_response( $post, false ); }, $query->posts ) ) );
 }
 

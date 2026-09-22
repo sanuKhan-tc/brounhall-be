@@ -20,6 +20,8 @@ The `bh_doctor` CPT is the reusable doctor model. Public reads use the project A
 
 Doctor fields are controlled structured data: role, headline, specialty, clinic, image ID/alt text, nationality, languages, areas of interest, education, and bio. Clinic values are limited to `Dubai`, `Abu Dhabi`, and `Al Ain`. The plugin seeds the doctors from the frontend project data idempotently on activation; drafts and private doctors are never public.
 
+Doctor records support the allow-listed `type` values `doctor` and `embryologist`. Use `GET /wp-json/brounhall/v1/doctors?type=embryologist` for the embryology directory.
+
 ## Clinics
 
 The `bh_clinic` CPT is the reusable clinic/location model. Public reads use:

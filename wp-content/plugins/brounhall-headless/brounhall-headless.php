@@ -27,4 +27,10 @@ require_once BROUNHALL_HEADLESS_DIR . 'includes/clinic-seeder.php';
 
 register_activation_hook( __FILE__, 'brounhall_seed_treatments' );
 register_activation_hook( __FILE__, 'brounhall_seed_doctors' );
+add_action( 'init', function () {
+	if ( '1' !== get_option( 'brounhall_embryologists_seeded' ) ) {
+		brounhall_seed_embryologists();
+		update_option( 'brounhall_embryologists_seeded', '1', false );
+	}
+}, 20 );
 register_activation_hook( __FILE__, 'brounhall_seed_clinics' );
