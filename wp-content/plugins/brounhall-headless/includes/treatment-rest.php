@@ -30,7 +30,10 @@ add_action(
 );
 
 function brounhall_treatment_response( WP_Post $post ) {
-	$data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_legacy_data', true ), true );
+	$data = json_decode( (string) $post->post_content, true );
+	if ( ! is_array( $data ) ) {
+		$data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_legacy_data', true ), true );
+	}
 	if ( ! is_array( $data ) ) {
 		$data = array();
 	}
