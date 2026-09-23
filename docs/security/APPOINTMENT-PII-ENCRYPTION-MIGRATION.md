@@ -43,7 +43,51 @@ After rotation, run `crypto-verify` and confirm the old key remains available un
 
 ## Admin and failure behavior
 
-Only users with `brounhall_view_appointment_pii` can decrypt records; the capability is granted to administrators, while the CPT itself remains restricted to `manage_options`. AEAD or key failures show a generic admin error and never fall back to plaintext for encrypted records. Audit events contain only event name, post ID and crypto version.
+Only users with `brounhall_view_appointment_pii` can decrypt records; the capability is granted to administrators. The CPT uses native appointment capabilities such as `edit_appointments` and `edit_private_appointments`. AEAD or key failures show a generic admin error and never fall back to plaintext for encrypted records. Audit events contain only event name, post ID and crypto version.
+
+## phpMyAdmin verification
+
+Select the WordPress database in phpMyAdmin and replace `YOUR_APPOINTMENT_ID` with an appointment post ID:
+
+```sql
+SELECT ID, post_title, post_status, post_date
+FROM wp_posts
+WHERE post_type = 'bh_appointment'
+ORDER BY ID DESC;
+```
+
+Inspect the appointment metadata:
+
+```sql
+SELECT post_id, meta_key, LEFT(meta_value, 120) AS value_preview
+FROM wp_postmeta
+WHERE post_id = YOUR_APPOINTMENT_ID
+ORDER BY meta_key;
+```
+
+Expected protected fields include:
+
+```text
+_bh_pii_ciphertext
+_bh_pii_nonce
+_bh_pii_salt
+_bh_wrapped_dek
+_bh_crypto_algorithm
+_bh_crypto_version
+_bh_kek_id
+_bh_email_blind_index
+_bh_phone_blind_index
+```
+
+The post title should contain only an opaque reference such as `APT-ABC1234567`. Check for legacy plaintext storage with:
+
+```sql
+SELECT post_id, meta_key
+FROM wp_postmeta
+WHERE meta_key = '_brounhall_appointment_data';
+```
+
+After migration, this query should return no records for successfully migrated appointments. Encryption keys must not appear in `wp_posts`, `wp_postmeta`, options or any other database table; they remain in server-side environment or KMS configuration.
 
 ## Production checklist
 
