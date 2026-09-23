@@ -1,0 +1,6 @@
+<?php
+defined( 'ABSPATH' ) || exit;
+
+add_action( 'add_meta_boxes', function () { add_meta_box( 'brounhall_blog_data', 'Blog structured content', 'brounhall_render_blog_data_box', 'post', 'normal', 'default' ); } );
+function brounhall_render_blog_data_box( $post ) { wp_nonce_field( 'brounhall_save_blog_data', 'brounhall_blog_nonce' ); $data = get_post_meta( $post->ID, '_brounhall_blog_data', true ); echo '<p>Structured content is validated JSON. Do not add HTML, scripts, or embeds.</p><textarea name="brounhall_blog_data" style="width:100%;min-height:420px;font-family:monospace;">' . esc_textarea( $data ) . '</textarea>'; }
+add_action( 'save_post_post', function ( $post_id ) { if ( ! isset( $_POST['brounhall_blog_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['brounhall_blog_nonce'] ) ), 'brounhall_save_blog_data' ) || ! current_user_can( 'edit_post', $post_id ) || ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) ) { return; } $data = json_decode( isset( $_POST['brounhall_blog_data'] ) ? wp_unslash( $_POST['brounhall_blog_data'] ) : '', true ); if ( ! is_array( $data ) ) { return; } update_post_meta( $post_id, '_brounhall_blog_data', wp_json_encode( brounhall_normalize_blog_data( $data ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ); update_post_meta( $post_id, '_brounhall_is_blog', '1' ); } );
