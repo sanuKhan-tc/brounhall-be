@@ -30,7 +30,9 @@ add_action(
 );
 
 function brounhall_treatment_response( WP_Post $post ) {
-	$data = json_decode( (string) $post->post_content, true );
+	$data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_entity_data', true ), true );
+	if ( ! is_array( $data ) ) $data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_treatment_data', true ), true );
+	if ( ! is_array( $data ) ) $data = json_decode( (string) $post->post_content, true );
 	if ( ! is_array( $data ) ) {
 		$data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_legacy_data', true ), true );
 	}
@@ -51,7 +53,7 @@ function brounhall_treatment_response( WP_Post $post ) {
 function brounhall_rest_treatments() {
 	$query = new WP_Query(
 		array(
-			'post_type'      => 'service',
+		'post_type'      => array( 'service', 'bh_treatment' ),
 			'post_status'    => 'publish',
 			'posts_per_page' => 50,
 			'orderby'        => array( 'menu_order' => 'ASC', 'title' => 'ASC' ),
@@ -75,7 +77,7 @@ function brounhall_rest_treatments() {
 }
 
 function brounhall_rest_treatment( WP_REST_Request $request ) {
-	$post = get_page_by_path( (string) $request['slug'], OBJECT, 'service' );
+	$post = get_page_by_path( (string) $request['slug'], OBJECT, array( 'service', 'bh_treatment' ) );
 	if ( ! $post || 'publish' !== $post->post_status ) {
 		return new WP_Error( 'brounhall_treatment_not_found', 'Treatment not found', array( 'status' => 404 ) );
 	}

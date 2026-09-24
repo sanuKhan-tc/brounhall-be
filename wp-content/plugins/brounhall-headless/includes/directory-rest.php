@@ -26,7 +26,8 @@ function brounhall_rest_image( $id, $alt = '' ) {
 }
 
 function brounhall_rest_doctor_data( WP_Post $post ) {
-	$data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_legacy_data', true ), true );
+	$data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_entity_data', true ), true );
+	if ( ! is_array( $data ) ) $data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_legacy_data', true ), true );
 	$data = is_array( $data ) ? $data : array();
 	$location_id = absint( get_post_meta( $post->ID, 'doctor_location', true ) );
 	return array(
@@ -64,7 +65,8 @@ function brounhall_rest_doctor( WP_REST_Request $request ) {
 }
 
 function brounhall_rest_clinic_data( WP_Post $post ) {
-	$data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_legacy_data', true ), true );
+	$data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_entity_data', true ), true );
+	if ( ! is_array( $data ) ) $data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_legacy_data', true ), true );
 	$data = is_array( $data ) ? $data : array();
 	$name = (string) ( get_post_meta( $post->ID, 'location_name', true ) ?: $post->post_title );
 	return array(

@@ -9,6 +9,45 @@ add_action( 'init', 'brounhall_register_service_post_type' );
 add_action( 'init', 'brounhall_register_doctor_post_type' );
 add_action( 'init', 'brounhall_register_location_post_type' );
 add_action( 'init', 'brounhall_register_faq_post_type' );
+add_action( 'init', 'brounhall_register_legacy_entity_post_types', 11 );
+
+/**
+ * Register the existing local/imported entity keys so their JSON editor and
+ * admin screens remain available. New content should use the canonical keys
+ * above; these aliases are retained for the current database.
+ *
+ * @return void
+ */
+function brounhall_register_legacy_entity_post_types() {
+	$types = array(
+		'bh_treatment' => array( 'Treatments', 'Treatment', array( 'title', 'editor', 'excerpt', 'thumbnail' ) ),
+		'bh_doctor'    => array( 'Doctors', 'Doctor', array( 'title', 'editor', 'thumbnail', 'revisions' ) ),
+		'bh_clinic'    => array( 'Clinics', 'Clinic', array( 'title', 'excerpt', 'thumbnail', 'revisions' ) ),
+		'bh_faq'       => array( 'FAQ Items', 'FAQ Item', array( 'title', 'revisions' ) ),
+	);
+
+	foreach ( $types as $post_type => $config ) {
+		if ( post_type_exists( $post_type ) ) {
+			continue;
+		}
+		register_post_type(
+			$post_type,
+			array(
+				'labels'              => array( 'name' => $config[0], 'singular_name' => $config[1], 'menu_name' => $config[0] ),
+				'public'              => 'bh_faq' !== $post_type,
+				'publicly_queryable'  => 'bh_faq' !== $post_type,
+				'show_ui'             => true,
+				'show_in_menu'        => true,
+				'show_in_rest'        => true,
+				'has_archive'         => false,
+				'rewrite'             => false,
+				'supports'            => $config[2],
+				'capability_type'     => 'post',
+				'map_meta_cap'        => true,
+			)
+		);
+	}
+}
 
 /**
  * Register the reusable Service entity. Editors see this as Treatments.
