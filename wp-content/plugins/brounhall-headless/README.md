@@ -175,3 +175,19 @@ BH-048 retains a small local-only dataset for GraphQL and integration work; thes
 Doctor 40 is the linked relationship case; Doctor 41 intentionally preserves the nullable/unlinked case. No Service, Location, Department, or FAQ relationships were added. Doctor 40 contains representative non-production SEO overrides for title, description, canonical URL, robots, Open Graph, Twitter, and breadcrumb fields; its image fields are empty because the local Media Library has no suitable existing asset. Doctor 41, the Locations, Services, Posts, and existing Sample Page use empty SEO overrides with the normal robots defaults. Global Settings were preserved unchanged.
 
 To reset local fixtures, delete the listed records by ID in WordPress Admin (or with the normal WordPress post APIs); no production reset or migration is provided. To reproduce them, rerun the BH-048 idempotent local API seeding operation using the same post types and slugs. The fixtures are intentionally retained for subsequent local contract tests.
+## JSON page editor
+
+Native marketing Pages now have a project-owned JSON editor. The editor keeps
+the existing YAML in `post_content` untouched and stores the migrated section
+tree in `_brounhall_page_data`; this makes the change reversible while the
+frontend continues reading its existing contract. Run the migration after the
+plugin is deployed with:
+
+```bash
+wp brounhall pages migrate
+```
+
+The editor renders nested page sections as highlighted panels, chooses text or
+textarea controls from field names, and selects images through the WordPress
+Media Library. Values are sanitized at save time and arbitrary markup,
+scripts, and styles are not accepted.
