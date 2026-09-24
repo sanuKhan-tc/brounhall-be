@@ -36,6 +36,14 @@ foreach ( array(
 	'preview.php',
 	'revalidation.php',
 	'security.php',
+	'appointment-validator.php',
+	'appointment-post-type.php',
+	'security/appointment-key-provider.php',
+	'security/appointment-crypto.php',
+	'security/appointment-migration.php',
+	'appointment-fields.php',
+	'appointment-settings.php',
+	'appointment-rest.php',
 ) as $module ) {
 	require_once BROUNHALL_HEADLESS_DIR . 'includes/' . $module;
 }

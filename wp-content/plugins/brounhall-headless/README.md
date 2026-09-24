@@ -191,3 +191,11 @@ The editor renders nested page sections as highlighted panels, chooses text or
 textarea controls from field names, and selects images through the WordPress
 Media Library. Values are sanitized at save time and arbitrary markup,
 scripts, and styles are not accepted.
+
+## Appointments
+
+The `bh_appointment` record type stores submitted appointment requests privately
+in WordPress. The Next.js `/api/appointments` route signs requests with the
+server-only `WORDPRESS_APPOINTMENT_API_KEY`; WordPress validates the signature,
+nonce, payload, replay token, and rate limit before saving. There is no public
+appointment listing or public WordPress mutation endpoint.
