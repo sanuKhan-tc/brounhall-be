@@ -191,8 +191,13 @@ function brounhall_page_yaml_parse_node( $tokens, &$index, $indent ) {
 			if ( 0 !== strpos( $text, '- ' ) ) break;
 			$rest = trim( substr( $text, 2 ) );
 			$index++;
-			if ( preg_match( '/^([^:]+):\s*(.*)$/', $rest, $match ) ) {
-				$item = array( trim( $match[1] ) => brounhall_page_yaml_scalar( $match[2] ) );
+			$is_quoted_scalar = strlen( $rest ) > 1 && in_array( $rest[0], array( '"', "'" ), true ) && $rest[0] === substr( $rest, -1 );
+			if ( $is_quoted_scalar ) {
+				$result[] = brounhall_page_yaml_scalar( $rest );
+			} elseif ( preg_match( '/^([^:]+):\s*(.*)$/', $rest, $match ) ) {
+				$item_key = trim( $match[1] );
+				$item_key = strlen( $item_key ) > 1 && in_array( $item_key[0], array( '"', "'" ), true ) && $item_key[0] === substr( $item_key, -1 ) ? substr( $item_key, 1, -1 ) : $item_key;
+				$item = array( $item_key => brounhall_page_yaml_scalar( $match[2] ) );
 				while ( isset( $tokens[ $index ] ) && $tokens[ $index ][0] > $indent ) {
 					$child = brounhall_page_yaml_parse_node( $tokens, $index, $tokens[ $index ][0] );
 					$item = array_merge( $item, is_array( $child ) ? $child : array() );
@@ -205,6 +210,7 @@ function brounhall_page_yaml_parse_node( $tokens, &$index, $indent ) {
 		}
 		if ( ! preg_match( '/^([^:]+):\s*(.*)$/', $text, $match ) ) { $index++; continue; }
 		$key = trim( $match[1] );
+		$key = strlen( $key ) > 1 && in_array( $key[0], array( '"', "'" ), true ) && $key[0] === substr( $key, -1 ) ? substr( $key, 1, -1 ) : $key;
 		$value = trim( $match[2] );
 		$index++;
 		if ( '>' === $value || '|' === $value ) {
@@ -227,6 +233,8 @@ function brounhall_page_yaml_scalar( $value ) {
 	if ( 'null' === strtolower( $value ) || '~' === $value ) return null;
 	if ( is_numeric( $value ) ) return false !== strpos( $value, '.' ) ? (float) $value : (int) $value;
 	if ( strlen( $value ) >= 2 && ( ( '"' === $value[0] && '"' === substr( $value, -1 ) ) || ( "'" === $value[0] && "'" === substr( $value, -1 ) ) ) ) $value = substr( $value, 1, -1 );
+	if ( strlen( $value ) > 1 && in_array( $value[0], array( '"', "'" ), true ) && $value[0] !== substr( $value, -1 ) ) $value = substr( $value, 1 );
+	if ( strlen( $value ) > 1 && in_array( substr( $value, -1 ), array( '"', "'" ), true ) && $value[0] !== substr( $value, -1 ) ) $value = substr( $value, 0, -1 );
 	return str_replace( array( '\\"', '\\n' ), array( '"', "\n" ), $value );
 }
 
