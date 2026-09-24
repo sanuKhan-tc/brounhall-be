@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 const BROUNHALL_PAGE_DATA_META = '_brounhall_page_data';
 
 add_action( 'add_meta_boxes_page', 'brounhall_add_page_editor' );
+add_action( 'add_meta_boxes_page', 'brounhall_hide_legacy_page_editor', 20 );
 add_action( 'save_post_page', 'brounhall_save_page_editor', 10, 2 );
 add_action( 'admin_enqueue_scripts', 'brounhall_enqueue_page_editor_assets' );
 add_action( 'plugins_loaded', 'brounhall_register_page_migration_command' );
@@ -24,6 +25,10 @@ function brounhall_add_page_editor() {
 		'normal',
 		'high'
 	);
+}
+
+function brounhall_hide_legacy_page_editor() {
+	remove_meta_box( 'postdivrich', 'page', 'normal' );
 }
 
 function brounhall_enqueue_page_editor_assets( $hook ) {
