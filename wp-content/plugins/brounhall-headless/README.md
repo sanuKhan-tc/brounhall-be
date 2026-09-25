@@ -199,3 +199,16 @@ in WordPress. The Next.js `/api/appointments` route signs requests with the
 server-only `WORDPRESS_APPOINTMENT_API_KEY`; WordPress validates the signature,
 nonce, payload, replay token, and rate limit before saving. There is no public
 appointment listing or public WordPress mutation endpoint.
+
+The WordPress runtime must provide these server-only environment variables;
+values are base64-encoded key material and must not be committed:
+
+```text
+BOURNHALL_APPOINTMENT_KEK              # 32 decoded bytes
+BOURNHALL_APPOINTMENT_EMAIL_INDEX_KEY  # at least 32 decoded bytes
+BOURNHALL_APPOINTMENT_PHONE_INDEX_KEY  # at least 32 decoded bytes
+BOURNHALL_APPOINTMENT_DUPLICATE_KEY    # at least 32 decoded bytes
+```
+
+Appointment and nonce responses are marked `no-store` because they contain
+security-sensitive request state and must not be served from an edge cache.

@@ -6,6 +6,15 @@ add_action( 'rest_api_init', function () {
 	register_rest_route( 'brounhall/v1', '/appointments/nonce', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_appointment_nonce', 'permission_callback' => 'brounhall_appointment_permission' ) );
 } );
 
+add_filter( 'rest_post_dispatch', function ( $response, $server, $request ) {
+	if ( 0 === strpos( $request->get_route(), '/brounhall/v1/appointments' ) ) {
+		$response->header( 'Cache-Control', 'no-store, private, max-age=0' );
+		$response->header( 'Pragma', 'no-cache' );
+		$response->header( 'X-Robots-Tag', 'noindex' );
+	}
+	return $response;
+}, 10, 3 );
+
 function brounhall_appointment_permission( WP_REST_Request $request ) {
 	$key = (string) get_option( 'brounhall_appointment_api_key', '' );
 	$timestamp = (string) $request->get_header( 'x-bourn-hall-timestamp' );
