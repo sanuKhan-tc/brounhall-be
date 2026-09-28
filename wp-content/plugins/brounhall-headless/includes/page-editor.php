@@ -104,7 +104,7 @@ function brounhall_save_entity_editor( $post_id, $post ) {
 		return;
 	}
 
-	$data = brounhall_sanitize_page_editor_value( wp_unslash( $_POST['brounhall_entity_data'] ) );
+	$data = brounhall_sanitize_page_editor_value( brounhall_unslash_editor_value( $_POST['brounhall_entity_data'] ) );
 	if ( is_array( $data ) ) {
 		$data = brounhall_normalize_multiline_data( $data );
 		update_post_meta( $post_id, BROUNHALL_ENTITY_DATA_META, wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
@@ -235,7 +235,7 @@ function brounhall_save_page_editor( $post_id, $post ) {
 		return;
 	}
 
-	$data = brounhall_sanitize_page_editor_value( wp_unslash( $_POST['brounhall_page_data'] ) );
+	$data = brounhall_sanitize_page_editor_value( brounhall_unslash_editor_value( $_POST['brounhall_page_data'] ) );
 	if ( is_array( $data ) && isset( $data['sections'] ) && is_array( $data['sections'] ) ) {
 		$data = brounhall_normalize_multiline_data( $data );
 		$data['version'] = 1;
@@ -268,12 +268,32 @@ function brounhall_sanitize_page_editor_value( $value, $key = '' ) {
 	return sanitize_text_field( (string) $value );
 }
 
+function brounhall_unslash_editor_value( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $child ) {
+			$value[ $key ] = brounhall_unslash_editor_value( $child );
+		}
+		return $value;
+	}
+
+	if ( ! is_string( $value ) ) {
+		return $value;
+	}
+
+	$newline_token = '__BROUNHALL_NEWLINE_TOKEN__';
+	$tab_token = '__BROUNHALL_TAB_TOKEN__';
+	$value = str_replace( array( '\\r\\n', '\\n', '\\r' ), $newline_token, $value );
+	$value = str_replace( '\\t', $tab_token, $value );
+	$value = wp_unslash( $value );
+	return str_replace( array( $newline_token, $tab_token ), array( '\\n', '\\t' ), $value );
+}
+
 /**
  * Store multiline editor values with real LF characters, never literal escape sequences.
  */
 function brounhall_normalize_multiline_text( $value ) {
 	$value = str_replace( array( "\r\n", "\r" ), "\n", (string) $value );
-	return str_replace( array( '\\r\\n', '\\n', '\\r' ), "\n", $value );
+	return str_replace( array( '\\r\\n', '\\n', '\\r', '\\t' ), array( "\n", "\n", "\n", "\t" ), $value );
 }
 
 function brounhall_normalize_multiline_data( $value ) {
