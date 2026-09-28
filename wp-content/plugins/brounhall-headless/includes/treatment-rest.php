@@ -39,6 +39,7 @@ function brounhall_treatment_response( WP_Post $post ) {
 	if ( ! is_array( $data ) ) {
 		$data = array();
 	}
+	$data = brounhall_normalize_multiline_data( $data );
 
 	return array_merge(
 		array(

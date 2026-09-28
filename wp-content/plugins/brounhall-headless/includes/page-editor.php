@@ -273,6 +273,17 @@ function brounhall_normalize_multiline_text( $value ) {
 	return str_replace( array( '\\r\\n', '\\n', '\\r' ), "\n", $value );
 }
 
+function brounhall_normalize_multiline_data( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $child ) {
+			$value[ $key ] = brounhall_normalize_multiline_data( $child );
+		}
+		return $value;
+	}
+
+	return is_string( $value ) ? brounhall_normalize_multiline_text( $value ) : $value;
+}
+
 /**
  * Small YAML reader for the existing page contract. It intentionally handles
  * only the map/list/scalar/block-string subset already used by these Pages.
