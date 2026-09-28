@@ -107,7 +107,7 @@ function brounhall_save_entity_editor( $post_id, $post ) {
 	$data = brounhall_sanitize_page_editor_value( brounhall_unslash_editor_value( $_POST['brounhall_entity_data'] ) );
 	if ( is_array( $data ) ) {
 		$data = brounhall_normalize_multiline_data( $data );
-		update_post_meta( $post_id, BROUNHALL_ENTITY_DATA_META, wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+		update_post_meta( $post_id, BROUNHALL_ENTITY_DATA_META, wp_slash( wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ) );
 	}
 }
 
@@ -239,7 +239,7 @@ function brounhall_save_page_editor( $post_id, $post ) {
 	if ( is_array( $data ) && isset( $data['sections'] ) && is_array( $data['sections'] ) ) {
 		$data = brounhall_normalize_multiline_data( $data );
 		$data['version'] = 1;
-		update_post_meta( $post_id, BROUNHALL_PAGE_DATA_META, wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+		update_post_meta( $post_id, BROUNHALL_PAGE_DATA_META, wp_slash( wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ) );
 	}
 }
 
@@ -399,7 +399,7 @@ function brounhall_migrate_pages_command( $args, $assoc_args ) {
 		$data = brounhall_page_yaml_to_array( $page->post_content );
 		if ( ! is_array( $data ) || empty( $data['sections'] ) || ! is_array( $data['sections'] ) ) continue;
 		$data['version'] = 1;
-		update_post_meta( $page->ID, BROUNHALL_PAGE_DATA_META, wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+		update_post_meta( $page->ID, BROUNHALL_PAGE_DATA_META, wp_slash( wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ) );
 		$count++;
 	}
 	WP_CLI::success( sprintf( 'Migrated %d pages to %s.', $count, BROUNHALL_PAGE_DATA_META ) );
@@ -412,7 +412,7 @@ function brounhall_migrate_entities_command( $args, $assoc_args ) {
 		if ( ! empty( get_post_meta( $post->ID, BROUNHALL_ENTITY_DATA_META, true ) ) && empty( $assoc_args['force'] ) ) continue;
 		$data = json_decode( (string) get_post_meta( $post->ID, brounhall_entity_source_meta_key( $post->post_type ), true ), true );
 		if ( ! is_array( $data ) ) continue;
-		update_post_meta( $post->ID, BROUNHALL_ENTITY_DATA_META, wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+		update_post_meta( $post->ID, BROUNHALL_ENTITY_DATA_META, wp_slash( wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ) );
 		$count++;
 	}
 	WP_CLI::success( sprintf( 'Migrated %d entities to %s.', $count, BROUNHALL_ENTITY_DATA_META ) );
