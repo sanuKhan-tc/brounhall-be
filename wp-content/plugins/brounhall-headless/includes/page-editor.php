@@ -299,6 +299,16 @@ function brounhall_normalize_multiline_text( $value ) {
 
 function brounhall_normalize_multiline_data( $value ) {
 	if ( is_array( $value ) ) {
+		$keys_are_numeric = ! empty( $value );
+		foreach ( array_keys( $value ) as $key ) {
+			if ( ! is_int( $key ) && ! ctype_digit( (string) $key ) ) {
+				$keys_are_numeric = false;
+				break;
+			}
+		}
+		if ( $keys_are_numeric ) {
+			$value = array_values( $value );
+		}
 		foreach ( $value as $key => $child ) {
 			$value[ $key ] = brounhall_normalize_multiline_data( $child );
 		}
