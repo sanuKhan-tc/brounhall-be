@@ -293,7 +293,8 @@ function brounhall_unslash_editor_value( $value ) {
  */
 function brounhall_normalize_multiline_text( $value ) {
 	$value = str_replace( array( "\r\n", "\r" ), "\n", (string) $value );
-	return str_replace( array( '\\r\\n', '\\n', '\\r', '\\t' ), array( "\n", "\n", "\n", "\t" ), $value );
+	$value = str_replace( array( '\\r\\n', '\\n', '\\r', '\\t' ), array( "\n", "\n", "\n", "\t" ), $value );
+	return preg_replace( '/([.!?])nn(?=\p{Lu})/u', '$1' . "\n\n", $value );
 }
 
 function brounhall_normalize_multiline_data( $value ) {
