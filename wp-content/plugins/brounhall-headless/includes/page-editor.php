@@ -106,6 +106,7 @@ function brounhall_save_entity_editor( $post_id, $post ) {
 
 	$data = brounhall_sanitize_page_editor_value( wp_unslash( $_POST['brounhall_entity_data'] ) );
 	if ( is_array( $data ) ) {
+		$data = brounhall_normalize_multiline_data( $data );
 		update_post_meta( $post_id, BROUNHALL_ENTITY_DATA_META, wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
 	}
 }
@@ -136,6 +137,7 @@ function brounhall_enqueue_page_editor_assets( $hook ) {
 	$script = <<<'JS'
 jQuery(function($){var root=$('#brounhall-entity-editor,#brounhall-page-editor');root.on('click','.brounhall-section-toggle',function(){ $(this).closest('.brounhall-section').toggleClass('is-collapsed'); });root.on('click','.brounhall-remove-item',function(){var list=$(this).closest('.brounhall-repeater');if(list.find('.brounhall-repeat-item').length>1)$(this).closest('.brounhall-repeat-item').remove();});root.on('click','.brounhall-add-item',function(){var list=$(this).closest('.brounhall-repeater'),items=list.find('.brounhall-repeat-item'),template=items.last().clone(),index=Number(list.attr('data-next-index')||items.length);template.find('[name]').each(function(){this.name=this.name.replace(/\[\d+\](?=\[|$)/g,'['+index+']');});template.find('[id]').each(function(){this.id=this.id+'-'+index;});template.find('input:not([type=hidden]),textarea').each(function(){if(this.type==='checkbox')this.checked=false;else this.value='';});template.insertBefore($(this));list.attr('data-next-index',index+1);});root.on('input','.brounhall-editor-filter',function(){var query=this.value.toLowerCase();root.find('.brounhall-section').each(function(){ $(this).toggle(!query||$(this).text().toLowerCase().indexOf(query)!==-1); });});root.on('click','.brounhall-expand-all',function(){root.find('.brounhall-section').removeClass('is-collapsed');});root.on('click','.brounhall-collapse-all',function(){root.find('.brounhall-section').addClass('is-collapsed');});root.on('click','.brounhall-media-button',function(e){e.preventDefault();var input=$('#'+$(this).data('target'));var frame=wp.media({title:'Select image',button:{text:'Use image'},library:{type:'image'},multiple:false});frame.on('select',function(){input.val(frame.state().get('selection').first().id);});frame.open();});});
 JS;
+	$script .= 'jQuery(function($){$("#brounhall-entity-editor,#brounhall-page-editor").closest("form").on("submit",function(){$(this).find("textarea").each(function(){this.value=this.value.replace(/\\\\r\\\\n/g,"\\n").replace(/\\\\n|\\\\r/g,"\\n").replace(/\\r\\n?|\\n/g,"\\n");});});});';
 	wp_add_inline_script( 'jquery-core', $script );
 }
 
@@ -235,6 +237,7 @@ function brounhall_save_page_editor( $post_id, $post ) {
 
 	$data = brounhall_sanitize_page_editor_value( wp_unslash( $_POST['brounhall_page_data'] ) );
 	if ( is_array( $data ) && isset( $data['sections'] ) && is_array( $data['sections'] ) ) {
+		$data = brounhall_normalize_multiline_data( $data );
 		$data['version'] = 1;
 		update_post_meta( $post_id, BROUNHALL_PAGE_DATA_META, wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
 	}
