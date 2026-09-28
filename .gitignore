@@ -2,3 +2,4 @@ wp-content/uploads/
 wp-config.php
 .env
 .htaccess 
+tools/generate-pii-code.php

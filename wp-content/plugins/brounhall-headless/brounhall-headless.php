@@ -41,9 +41,12 @@ foreach ( array(
 	'security/appointment-key-provider.php',
 	'security/appointment-crypto.php',
 	'security/appointment-migration.php',
+	'record-workflow.php',
 	'appointment-fields.php',
 	'appointment-settings.php',
 	'appointment-rest.php',
+	'complaint-post-type.php',
+	'complaint-rest.php',
 ) as $module ) {
 	require_once BROUNHALL_HEADLESS_DIR . 'includes/' . $module;
 }

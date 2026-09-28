@@ -212,3 +212,24 @@ BOURNHALL_APPOINTMENT_DUPLICATE_KEY    # at least 32 decoded bytes
 
 Appointment and nonce responses are marked `no-store` because they contain
 security-sensitive request state and must not be served from an edge cache.
+
+## Patient complaints
+
+The `bh_complaint` record type stores patient complaint submissions privately.
+The Next.js `/api/complaints` route uses the same server-only HMAC request
+signing, nonce, replay protection, rate limiting, and XChaCha20-Poly1305
+envelope as appointments. Complaint records are visible only to administrators
+with the complaint PII capability; no public listing or mutation is exposed.
+WordPress admin tables show only the private reference and date. Viewing the
+encrypted content requires the six-digit value configured in `wp-config.php` as
+`BOURNHALL_PII_ACCESS_CODE_ENCRYPTED`. Generate a value locally with the
+ignored `tools/generate-pii-code.php` helper; it defaults to `123456` only when
+the encrypted config value is absent.
+
+Appointment and complaint records keep patient data read-only. Staff can update
+the workflow status (`New`, `In progress`, `Resolved`, or `Closed`) and append
+private internal notes from the separate Record workflow box.
+
+The WordPress admin groups both record types under **Patient Records** with
+Appointments first and Patient Complaints second. Form delivery settings remain
+under **Settings → Bourn Hall Form Settings**.
