@@ -202,7 +202,7 @@ function brounhall_render_page_editor_value( $value, $path, $label, $root = 'bro
 	if ( 'image' === $type ) {
 		echo '<div class="brounhall-media"><input id="' . esc_attr( $input_id ) . '" type="number" min="0" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '"><button type="button" class="button brounhall-media-button" data-target="' . esc_attr( $input_id ) . '">Choose image</button></div>';
 	} elseif ( 'textarea' === $type ) {
-		echo '<textarea id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $name ) . '">' . esc_textarea( $value ) . '</textarea>';
+		echo '<textarea id="' . esc_attr( $input_id ) . '" name="' . esc_attr( $name ) . '">' . esc_textarea( brounhall_normalize_multiline_text( $value ) ) . '</textarea>';
 	} elseif ( 'boolean' === $type ) {
 		echo '<input type="hidden" name="' . esc_attr( $name ) . '" value="0"><label><input id="' . esc_attr( $input_id ) . '" type="checkbox" name="' . esc_attr( $name ) . '" value="1"' . checked( $value, true, false ) . '> Enabled</label>';
 	} else {
@@ -219,7 +219,7 @@ function brounhall_page_editor_field_type( $key, $value ) {
 	if ( is_bool( $value ) ) {
 		return 'boolean';
 	}
-	if ( preg_match( '/description|body|paragraph|note|introduction|content|text|answer|caption/', $key ) ) {
+	if ( preg_match( '/description|body|bio|paragraph|note|introduction|content|text|answer|caption|education|areasofinterest|languages/', $key ) ) {
 		return 'textarea';
 	}
 	if ( preg_match( '/href|url|link/', $key ) ) {
@@ -256,13 +256,21 @@ function brounhall_sanitize_page_editor_value( $value, $key = '' ) {
 	if ( preg_match( '/href|url|link/i', (string) $key ) ) {
 		return esc_url_raw( (string) $value );
 	}
-	if ( preg_match( '/description|body|paragraph|note|introduction|content|text|answer|caption/i', (string) $key ) ) {
-		return sanitize_textarea_field( (string) $value );
+	if ( preg_match( '/description|body|bio|paragraph|note|introduction|content|text|answer|caption|education|areasofinterest|languages/i', (string) $key ) ) {
+		return brounhall_normalize_multiline_text( sanitize_textarea_field( (string) $value ) );
 	}
 	if ( 'enabled' === strtolower( (string) $key ) ) {
 		return (bool) $value;
 	}
 	return sanitize_text_field( (string) $value );
+}
+
+/**
+ * Store multiline editor values with real LF characters, never literal escape sequences.
+ */
+function brounhall_normalize_multiline_text( $value ) {
+	$value = str_replace( array( "\r\n", "\r" ), "\n", (string) $value );
+	return str_replace( array( '\\r\\n', '\\n', '\\r' ), "\n", $value );
 }
 
 /**
