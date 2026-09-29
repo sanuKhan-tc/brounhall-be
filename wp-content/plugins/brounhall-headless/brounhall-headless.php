@@ -16,6 +16,7 @@ foreach ( array(
 	'fields.php',
 	'page-editor.php',
 	'locale-migration.php',
+	'blog-rest.php',
 	'content-types.php',
 	'treatment-rest.php',
 	'directory-rest.php',

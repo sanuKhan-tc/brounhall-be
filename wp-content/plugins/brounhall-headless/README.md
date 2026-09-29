@@ -171,6 +171,22 @@ command locally or over SSH after deployment. It uploads the seed file to a
 temporary remote path and removes it after the command completes. Only
 approved Arabic translations should be added to the seed file.
 
+### Blog content migration
+
+Blogs use native WordPress Posts with managed `_brounhall_blog_data` metadata.
+`tools/seed-blogs.ps1` generates English and `_ar` records from the frontend
+static source, replaces only previously managed blog records, and can run
+locally or over SSH after deployment:
+
+```powershell
+powershell -File tools/seed-blogs.ps1 -Target local -Execute -Replace
+powershell -File tools/seed-blogs.ps1 -Target remote -Execute -Replace -SshKey $env:USERPROFILE\.ssh\wpe_brounhall_deploy
+```
+
+The Arabic records intentionally clone the approved static source until Arabic
+blog copy is supplied; they remain separate CMS records and are served only
+for Arabic requests.
+
 ## Representative development fixtures
 
 BH-048 retains a small local-only dataset for GraphQL and integration work; these records are not production content and are not a frontend migration. The fixtures were created once with the WordPress post and ACF APIs through a local PHP command, using stable slugs and an existing-record check so rerunning the operation does not create duplicates. No permanent seeder runs automatically.
