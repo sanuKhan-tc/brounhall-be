@@ -155,6 +155,22 @@ The featured panel stores label **Egg Freezing** and a validated link titled **E
 - WordPress: http://brounhall-wp.local/
 - GraphQL: http://brounhall-wp.local/graphql
 
+## Arabic content migration
+
+Arabic page and treatment records use an `_ar` slug. Doctors keep their
+existing slug and store translated fields under `locales.ar` in the entity
+data. The migration is dry-run by default and never changes English records:
+
+```bash
+wp brounhall locale migrate --file=/path/to/arabic-content.seed.json
+wp brounhall locale migrate --file=/path/to/arabic-content.seed.json --execute=1
+```
+
+The repository-level `tools/seed-arabic-content.ps1` wrapper runs the same
+command locally or over SSH after deployment. It uploads the seed file to a
+temporary remote path and removes it after the command completes. Only
+approved Arabic translations should be added to the seed file.
+
 ## Representative development fixtures
 
 BH-048 retains a small local-only dataset for GraphQL and integration work; these records are not production content and are not a frontend migration. The fixtures were created once with the WordPress post and ACF APIs through a local PHP command, using stable slugs and an existing-record check so rerunning the operation does not create duplicates. No permanent seeder runs automatically.

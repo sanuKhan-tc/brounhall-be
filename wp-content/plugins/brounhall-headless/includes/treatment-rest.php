@@ -19,7 +19,7 @@ add_action(
 		);
 		register_rest_route(
 			'brounhall/v1',
-			'/treatments/(?P<slug>[a-z0-9]+(?:-[a-z0-9]+)*)',
+			'/treatments/(?P<slug>[a-z0-9]+(?:[-_][a-z0-9]+)*)',
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => 'brounhall_rest_treatment',
@@ -41,17 +41,20 @@ function brounhall_treatment_response( WP_Post $post ) {
 	}
 	$data = brounhall_normalize_multiline_data( $data );
 
-	return array_merge(
+	$response = array_merge(
 		array(
 			'id'   => (int) $post->ID,
-			'slug' => $post->post_name,
+			'slug' => brounhall_base_locale_slug( $post->post_name ),
 			'title' => get_the_title( $post ),
 		),
 		$data
 	);
+	$response['slug'] = brounhall_base_locale_slug( $post->post_name );
+	return $response;
 }
 
-function brounhall_rest_treatments() {
+function brounhall_rest_treatments( $request = null ) {
+	$locale = function_exists( 'brounhall_request_locale' ) ? brounhall_request_locale( $request ) : 'en';
 	$query = new WP_Query(
 		array(
 		'post_type'      => array( 'service', 'bh_treatment' ),
@@ -62,16 +65,21 @@ function brounhall_rest_treatments() {
 		)
 	);
 
+	$items = array_values( array_filter( $query->posts, function ( $post ) use ( $locale ) {
+		$is_arabic = (bool) preg_match( '/_ar$/', $post->post_name );
+		return 'ar' === $locale ? $is_arabic : ! $is_arabic;
+	} ) );
+
 	return rest_ensure_response(
 		array(
 			'items' => array_map(
 				function ( $post ) {
 					return array(
-						'slug'  => $post->post_name,
+						'slug'  => brounhall_base_locale_slug( $post->post_name ),
 						'title' => get_the_title( $post ),
 					);
 				},
-				$query->posts
+				$items
 			),
 		)
 	);
