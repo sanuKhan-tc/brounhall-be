@@ -47,7 +47,16 @@ function brounhall_hide_empty_canonical_entity_menus() {
 		'faq'      => 'bh_faq',
 	);
 	foreach ( $aliases as $canonical => $legacy ) {
-		if ( post_type_exists( $legacy ) && ! get_posts( array( 'post_type' => $canonical, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids' ) ) && get_posts( array( 'post_type' => $legacy, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids' ) ) ) {
+		if ( ! post_type_exists( $legacy ) ) {
+			continue;
+		}
+
+		$canonical_has_posts = get_posts( array( 'post_type' => $canonical, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids' ) );
+		$legacy_has_posts    = get_posts( array( 'post_type' => $legacy, 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids' ) );
+
+		if ( $canonical_has_posts || ! $legacy_has_posts ) {
+			remove_menu_page( 'edit.php?post_type=' . $legacy );
+		} else {
 			remove_menu_page( 'edit.php?post_type=' . $canonical );
 		}
 	}
