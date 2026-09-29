@@ -15,6 +15,7 @@ define( 'BROUNHALL_HEADLESS_DIR', plugin_dir_path( __FILE__ ) );
 foreach ( array(
 	'fields.php',
 	'page-editor.php',
+	'admin-content-columns.php',
 	'locale-migration.php',
 	'blog-rest.php',
 	'content-types.php',
