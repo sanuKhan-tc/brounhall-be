@@ -69,7 +69,7 @@ function brounhall_appointment_get_data( $post_id, $allow_legacy = false ) {
 	if ( ! current_user_can( 'brounhall_view_appointment_pii' ) ) { return new WP_Error( 'brounhall_appointment_forbidden', 'Sensitive appointment data is restricted', array( 'status' => 403 ) ); }
 	$envelope = brounhall_appointment_read_envelope( $post_id );
 	if ( ! empty( $envelope['ciphertext'] ) ) {
-		try { return brounhall_appointment_decrypt( get_post_meta( $post_id, '_bh_appointment_ref', true ), $envelope ); } catch ( Throwable $error ) { brounhall_appointment_security_event( 'appointment.pii.decrypt_failed', $post_id, (string) $envelope['crypto_version'] ); return new WP_Error( 'brounhall_appointment_decrypt_failed', 'Sensitive appointment data could not be decrypted' ); }
+		try { return brounhall_appointment_decrypt( get_post_meta( $post_id, '_bh_appointment_ref', true ), $envelope ); } catch ( Throwable $error ) { brounhall_appointment_security_event( 'appointment_pii_decrypt_failed', (string) $envelope['crypto_version'] ); return new WP_Error( 'brounhall_appointment_decrypt_failed', 'Sensitive appointment data could not be decrypted' ); }
 	}
 	if ( $allow_legacy ) {
 		$legacy = json_decode( get_post_meta( $post_id, '_brounhall_appointment_data', true ), true );
@@ -79,5 +79,6 @@ function brounhall_appointment_get_data( $post_id, $allow_legacy = false ) {
 }
 
 function brounhall_appointment_security_event( $event, $post_id = 0, $version = '' ) {
-	error_log( wp_json_encode( array( 'event' => $event, 'appointmentId' => absint( $post_id ), 'cryptoVersion' => sanitize_text_field( $version ) ) ) );
+	$failed = false !== strpos( (string) $event, 'failed' );
+	brounhall_log( $failed ? 'error' : 'info', $event, $failed ? 'Appointment sensitive data operation failed' : 'Appointment cryptographic operation completed', $failed ? array( 'error_type' => 'decryption_failed' ) : array() );
 }

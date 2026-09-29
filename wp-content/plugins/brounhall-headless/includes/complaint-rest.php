@@ -22,7 +22,7 @@ function brounhall_complaint_nonce() { return rest_ensure_response( array( 'nonc
 function brounhall_create_complaint( WP_REST_Request $request ) {
 	$payload = json_decode( $request->get_body(), true );
 	if ( ! is_array( $payload ) || ! wp_verify_nonce( sanitize_text_field( (string) ( $payload['wpNonce'] ?? '' ) ), 'brounhall_create_complaint' ) ) return new WP_Error( 'brounhall_complaint_nonce_invalid', 'Request rejected', array( 'status' => 403 ) );
-	$data = brounhall_complaint_validate_payload( $payload ); if ( is_wp_error( $data ) ) return $data;
+	$data = brounhall_complaint_validate_payload( $payload ); if ( is_wp_error( $data ) ) { brounhall_log( 'warn', 'complaint_validation_failed', 'Complaint validation failed', array( 'request_id' => brounhall_observability_request_id( $request ), 'error_type' => 'validation_failure' ) ); return $data; }
 	$token_key = 'brounhall_complaint_token_' . md5( $data['clientToken'] ); if ( false !== get_transient( $token_key ) ) return rest_ensure_response( array( 'success' => true, 'duplicate' => true ) );
 	set_transient( $token_key, 'processing', 10 * MINUTE_IN_SECONDS );
 	$reference = 'CMP-' . strtoupper( bin2hex( random_bytes( 5 ) ) ); $secure = $data; unset( $secure['clientToken'] );
@@ -33,5 +33,6 @@ function brounhall_create_complaint( WP_REST_Request $request ) {
 	set_transient( $token_key, (int) $post_id, 10 * MINUTE_IN_SECONDS );
 	$recipients = preg_split( '/\s+/', (string) get_option( 'brounhall_appointment_recipients', '' ), -1, PREG_SPLIT_NO_EMPTY ); $recipients = array_values( array_filter( $recipients, 'is_email' ) );
 	if ( $recipients && function_exists( 'brounhall_appointment_is_local' ) && ! brounhall_appointment_is_local() ) wp_mail( $recipients, 'New Bourn Hall patient complaint', "A new patient complaint was received.\n\nReference: {$reference}\nReceived: {$data['submittedAt']}\n\nOpen the secured WordPress admin area to view it.", array( 'Content-Type: text/plain; charset=UTF-8' ) );
+	brounhall_log( 'info', 'complaint_accepted', 'Patient complaint accepted', array( 'request_id' => brounhall_observability_request_id( $request ) ) );
 	return rest_ensure_response( array( 'success' => true ) );
 }
