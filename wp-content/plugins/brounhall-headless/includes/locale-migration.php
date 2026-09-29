@@ -81,7 +81,7 @@ function brounhall_locale_migrate_doctor( $item, $execute ) {
 	$slug = isset( $item['slug'] ) ? sanitize_title( $item['slug'] ) : '';
 	$arabic = isset( $item['arabic'] ) && is_array( $item['arabic'] ) ? $item['arabic'] : array();
 	if ( '' === $slug || empty( $arabic ) ) return 'skipped';
-	$doctor = get_page_by_path( $slug, OBJECT, 'doctor' );
+	$doctor = get_page_by_path( $slug, OBJECT, 'bh_doctor' );
 	if ( ! $doctor ) return 'missing';
 	if ( ! $execute ) return 'planned';
 	$data = json_decode( (string) get_post_meta( $doctor->ID, BROUNHALL_ENTITY_DATA_META, true ), true );

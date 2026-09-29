@@ -55,7 +55,7 @@ function brounhall_rest_doctor_data( WP_Post $post, $request = null ) {
 }
 
 function brounhall_rest_doctors( $request = null ) {
-	$query = new WP_Query( array( 'post_type' => 'doctor', 'post_status' => 'publish', 'posts_per_page' => 100, 'orderby' => array( 'menu_order' => 'ASC', 'title' => 'ASC' ), 'no_found_rows' => true ) );
+	$query = new WP_Query( array( 'post_type' => 'bh_doctor', 'post_status' => 'publish', 'posts_per_page' => 100, 'orderby' => array( 'menu_order' => 'ASC', 'title' => 'ASC' ), 'no_found_rows' => true ) );
 	$items = array_map( function ( $post ) use ( $request ) { $item = brounhall_rest_doctor_data( $post, $request ); return array( 'id' => $item['id'], 'slug' => $item['slug'], 'type' => $item['type'], 'name' => $item['name'], 'role' => $item['role'], 'clinic' => $item['clinic'] ); }, $query->posts );
 	$type = $request instanceof WP_REST_Request ? (string) $request->get_param( 'type' ) : '';
 	if ( in_array( $type, array( 'doctor', 'embryologist' ), true ) ) {
@@ -65,7 +65,7 @@ function brounhall_rest_doctors( $request = null ) {
 }
 
 function brounhall_rest_doctor( WP_REST_Request $request ) {
-	$post = get_page_by_path( (string) $request['slug'], OBJECT, 'doctor' );
+	$post = get_page_by_path( (string) $request['slug'], OBJECT, 'bh_doctor' );
 	if ( ! $post || 'publish' !== $post->post_status ) return new WP_Error( 'brounhall_doctor_not_found', 'Doctor not found', array( 'status' => 404 ) );
 	return rest_ensure_response( brounhall_rest_doctor_data( $post, $request ) );
 }
