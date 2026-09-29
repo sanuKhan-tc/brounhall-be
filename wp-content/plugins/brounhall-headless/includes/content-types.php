@@ -68,13 +68,11 @@ function brounhall_register_service_post_type() {
 				'view_item'          => __( 'View Treatment', 'brounhall-headless' ),
 				'search_items'       => __( 'Search Treatments', 'brounhall-headless' ),
 				'not_found'          => __( 'No treatments found.', 'brounhall-headless' ),
-			'menu_name'          => __( 'Localized Treatments', 'brounhall-headless' ),
+				'menu_name'          => __( 'Treatments', 'brounhall-headless' ),
 			),
 			'public'             => true,
 			'show_ui'            => true,
-			// Keep one visible Treatments entry in local/legacy installs while
-			// retaining the canonical service post type and its own edit screen.
-			'show_in_menu'       => 'edit.php?post_type=bh_treatment',
+			'show_in_menu'       => true,
 			'show_in_rest'       => true,
 			'has_archive'        => false,
 			'rewrite'            => array(
