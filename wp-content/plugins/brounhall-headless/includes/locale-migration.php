@@ -91,12 +91,35 @@ function brounhall_locale_migrate_doctor( $item, $execute ) {
 	return 'updated';
 }
 
+function brounhall_locale_clear_blogs( $execute ) {
+	$posts = get_posts( array( 'post_type' => 'post', 'post_status' => 'any', 'posts_per_page' => -1, 'meta_key' => '_brounhall_blog_data' ) );
+	if ( ! $execute ) return count( $posts );
+	foreach ( $posts as $post ) wp_delete_post( $post->ID, true );
+	return count( $posts );
+}
+
+function brounhall_locale_migrate_blog( $item, $execute ) {
+	$locale = brounhall_supported_locale( $item['locale'] ?? 'en' );
+	$slug   = isset( $item['slug'] ) ? brounhall_localized_slug( $item['slug'], $locale ) : '';
+	$data   = isset( $item['data'] ) && is_array( $item['data'] ) ? $item['data'] : array();
+	if ( '' === $slug || empty( $data ) ) return 'skipped';
+	$existing = get_page_by_path( $slug, OBJECT, 'post' );
+	if ( ! $execute ) return $existing ? 'existing' : 'planned';
+	$post_id = $existing ? $existing->ID : wp_insert_post( array( 'post_type' => 'post', 'post_status' => brounhall_locale_seed_status( $item ), 'post_title' => sanitize_text_field( $item['title'] ?? $data['title'] ?? $slug ), 'post_excerpt' => sanitize_textarea_field( $data['excerpt'] ?? '' ), 'post_name' => $slug, 'post_content' => sanitize_textarea_field( $data['excerpt'] ?? '' ) ) );
+	if ( is_wp_error( $post_id ) ) return 'failed';
+	wp_update_post( array( 'ID' => $post_id, 'post_status' => brounhall_locale_seed_status( $item ), 'post_title' => sanitize_text_field( $item['title'] ?? $data['title'] ?? $slug ), 'post_excerpt' => sanitize_textarea_field( $data['excerpt'] ?? '' ), 'post_name' => $slug ) );
+	update_post_meta( $post_id, '_brounhall_blog_data', wp_slash( wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) ) );
+	return $existing ? 'updated' : 'created';
+}
+
 function brounhall_locale_migrate_command( $args, $assoc_args ) {
 	$data = brounhall_locale_seed_file( $assoc_args['file'] ?? '' );
 	$execute = ! empty( $assoc_args['execute'] );
-	$counts = array( 'pages' => array(), 'treatments' => array(), 'doctors' => array() );
+	$counts = array( 'pages' => array(), 'treatments' => array(), 'doctors' => array(), 'blogs' => array() );
+	if ( ! empty( $assoc_args['replace'] ) && ! empty( $data['blogs'] ) ) $counts['blogs']['cleared'] = brounhall_locale_clear_blogs( $execute );
 	foreach ( (array) ( $data['pages'] ?? array() ) as $item ) { $result = brounhall_locale_migrate_page( $item, $execute ); $counts['pages'][ $result ] = ( $counts['pages'][ $result ] ?? 0 ) + 1; }
 	foreach ( (array) ( $data['treatments'] ?? array() ) as $item ) { $result = brounhall_locale_migrate_treatment( $item, $execute ); $counts['treatments'][ $result ] = ( $counts['treatments'][ $result ] ?? 0 ) + 1; }
 	foreach ( (array) ( $data['doctors'] ?? array() ) as $item ) { $result = brounhall_locale_migrate_doctor( $item, $execute ); $counts['doctors'][ $result ] = ( $counts['doctors'][ $result ] ?? 0 ) + 1; }
+	foreach ( (array) ( $data['blogs'] ?? array() ) as $item ) { $result = brounhall_locale_migrate_blog( $item, $execute ); $counts['blogs'][ $result ] = ( $counts['blogs'][ $result ] ?? 0 ) + 1; }
 	WP_CLI::success( ( $execute ? 'Arabic migration completed. ' : 'Dry run only. Nothing was written. ' ) . wp_json_encode( $counts ) );
 }
