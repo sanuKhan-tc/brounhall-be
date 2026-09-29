@@ -77,7 +77,8 @@ function brounhall_create_appointment( WP_REST_Request $request ) {
 }
 
 function brounhall_appointment_security_log( $event, WP_REST_Request $request ) {
-	error_log( wp_json_encode( array( 'event' => $event, 'requestId' => sanitize_text_field( (string) $request->get_header( 'x-bourn-hall-request-id' ) ) ) ) );
+	$level = false !== strpos( (string) $event, 'accepted' ) ? 'info' : 'warn';
+	brounhall_log( $level, $event, 'Appointment request security event', array( 'request_id' => brounhall_observability_request_id( $request ) ) );
 }
 
 function brounhall_appointment_nonce() {

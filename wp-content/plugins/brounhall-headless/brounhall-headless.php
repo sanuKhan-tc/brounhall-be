@@ -14,6 +14,8 @@ define( 'BROUNHALL_HEADLESS_DIR', plugin_dir_path( __FILE__ ) );
 
 foreach ( array(
 	'fields.php',
+	'observability/logger.php',
+	'observability/health.php',
 	'page-editor.php',
 	'admin-content-columns.php',
 	'locale-migration.php',
