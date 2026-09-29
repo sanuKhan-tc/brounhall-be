@@ -9,7 +9,7 @@ add_action(
 	'rest_api_init',
 	function () {
 		register_rest_route( 'brounhall/v1', '/doctors', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_rest_doctors', 'permission_callback' => '__return_true' ) );
-		register_rest_route( 'brounhall/v1', '/doctors/(?P<slug>[a-z0-9]+(?:-[a-z0-9]+)*)', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_rest_doctor', 'permission_callback' => '__return_true' ) );
+	register_rest_route( 'brounhall/v1', '/doctors/(?P<slug>[a-z0-9]+(?:[-_][a-z0-9]+)*)', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_rest_doctor', 'permission_callback' => '__return_true' ) );
 		register_rest_route( 'brounhall/v1', '/clinics', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_rest_clinics', 'permission_callback' => '__return_true' ) );
 		register_rest_route( 'brounhall/v1', '/clinics/(?P<slug>[a-z0-9]+(?:-[a-z0-9]+)*)', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_rest_clinic', 'permission_callback' => '__return_true' ) );
 		register_rest_route( 'brounhall/v1', '/faqs/faq', array( 'methods' => WP_REST_Server::READABLE, 'callback' => 'brounhall_rest_faq', 'permission_callback' => '__return_true' ) );
@@ -25,33 +25,38 @@ function brounhall_rest_image( $id, $alt = '' ) {
 	);
 }
 
-function brounhall_rest_doctor_data( WP_Post $post ) {
+function brounhall_rest_doctor_data( WP_Post $post, $request = null ) {
 	$data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_entity_data', true ), true );
 	if ( ! is_array( $data ) ) $data = json_decode( (string) get_post_meta( $post->ID, '_brounhall_legacy_data', true ), true );
 	$data = is_array( $data ) ? $data : array();
 	$data = brounhall_normalize_multiline_data( $data );
+	$locale = function_exists( 'brounhall_request_locale' ) ? brounhall_request_locale( $request ) : 'en';
+	$localized = 'ar' === $locale && is_array( $data['locales']['ar'] ?? null ) ? $data['locales']['ar'] : array();
+	$pick = static function ( $key, $fallback = '' ) use ( $localized, $data, $locale ) {
+		return (string) ( 'ar' === $locale ? ( $localized[ $key ] ?? '' ) : ( $data[ $key ] ?? $fallback ) );
+	};
 	$location_id = absint( get_post_meta( $post->ID, 'doctor_location', true ) );
 	return array(
 		'id'             => (int) $post->ID,
 		'slug'           => $post->post_name,
 		'type'           => 'embryologist' === ( $data['type'] ?? '' ) ? 'embryologist' : 'doctor',
-		'name'           => get_the_title( $post ),
-		'role'           => (string) ( $data['role'] ?? get_post_meta( $post->ID, 'doctor_role', true ) ),
-		'clinic'         => (string) ( $data['clinic'] ?? ( $location_id ? get_post_meta( $location_id, 'location_name', true ) : '' ) ),
-		'headline'       => (string) ( $data['headline'] ?? get_post_meta( $post->ID, 'doctor_headline', true ) ),
-		'specialty'      => (string) ( $data['specialty'] ?? get_post_meta( $post->ID, 'doctor_specialty', true ) ),
+		'name'           => $pick( 'name', get_the_title( $post ) ),
+		'role'           => $pick( 'role', get_post_meta( $post->ID, 'doctor_role', true ) ),
+		'clinic'         => $pick( 'clinic', $location_id ? get_post_meta( $location_id, 'location_name', true ) : '' ),
+		'headline'       => $pick( 'headline', get_post_meta( $post->ID, 'doctor_headline', true ) ),
+		'specialty'      => $pick( 'specialty', get_post_meta( $post->ID, 'doctor_specialty', true ) ),
 		'image'          => brounhall_rest_image( $data['imageId'] ?? get_post_meta( $post->ID, 'doctor_imageid', true ), $data['imageAlt'] ?? get_post_meta( $post->ID, 'doctor_imagealt', true ) ),
-		'nationality'    => (string) ( $data['nationality'] ?? get_post_meta( $post->ID, 'doctor_nationality', true ) ),
-		'languages'      => (string) ( $data['languages'] ?? get_post_meta( $post->ID, 'doctor_languages', true ) ),
-		'areasOfInterest' => (string) ( $data['areasOfInterest'] ?? get_post_meta( $post->ID, 'doctor_areasofinterest', true ) ),
-		'education'      => (string) ( $data['education'] ?? get_post_meta( $post->ID, 'doctor_education', true ) ),
-		'bio'            => (string) ( $data['bio'] ?? $post->post_content ),
+		'nationality'    => $pick( 'nationality', get_post_meta( $post->ID, 'doctor_nationality', true ) ),
+		'languages'      => $pick( 'languages', get_post_meta( $post->ID, 'doctor_languages', true ) ),
+		'areasOfInterest' => $pick( 'areasOfInterest', get_post_meta( $post->ID, 'doctor_areasofinterest', true ) ),
+		'education'      => $pick( 'education', get_post_meta( $post->ID, 'doctor_education', true ) ),
+		'bio'            => $pick( 'bio', $post->post_content ),
 	);
 }
 
 function brounhall_rest_doctors( $request = null ) {
 	$query = new WP_Query( array( 'post_type' => 'doctor', 'post_status' => 'publish', 'posts_per_page' => 100, 'orderby' => array( 'menu_order' => 'ASC', 'title' => 'ASC' ), 'no_found_rows' => true ) );
-	$items = array_map( function ( $post ) { $item = brounhall_rest_doctor_data( $post ); return array( 'id' => $item['id'], 'slug' => $item['slug'], 'type' => $item['type'], 'name' => $item['name'], 'role' => $item['role'], 'clinic' => $item['clinic'] ); }, $query->posts );
+	$items = array_map( function ( $post ) use ( $request ) { $item = brounhall_rest_doctor_data( $post, $request ); return array( 'id' => $item['id'], 'slug' => $item['slug'], 'type' => $item['type'], 'name' => $item['name'], 'role' => $item['role'], 'clinic' => $item['clinic'] ); }, $query->posts );
 	$type = $request instanceof WP_REST_Request ? (string) $request->get_param( 'type' ) : '';
 	if ( in_array( $type, array( 'doctor', 'embryologist' ), true ) ) {
 		$items = array_values( array_filter( $items, function ( $item ) use ( $type ) { return $item['type'] === $type; } ) );
@@ -62,7 +67,7 @@ function brounhall_rest_doctors( $request = null ) {
 function brounhall_rest_doctor( WP_REST_Request $request ) {
 	$post = get_page_by_path( (string) $request['slug'], OBJECT, 'doctor' );
 	if ( ! $post || 'publish' !== $post->post_status ) return new WP_Error( 'brounhall_doctor_not_found', 'Doctor not found', array( 'status' => 404 ) );
-	return rest_ensure_response( brounhall_rest_doctor_data( $post ) );
+	return rest_ensure_response( brounhall_rest_doctor_data( $post, $request ) );
 }
 
 function brounhall_rest_clinic_data( WP_Post $post ) {
