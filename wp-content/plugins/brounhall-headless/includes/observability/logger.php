@@ -57,5 +57,20 @@ function brounhall_log( $level, $event, $message, $context = array() ) {
 		),
 		brounhall_observability_sanitize_context( $context )
 	);
-	error_log( wp_json_encode( $entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+	$output = wp_json_encode( $entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+	error_log( $output );
+
+	$log_file = defined( 'BROUNHALL_LOG_FILE' )
+		? (string) BROUNHALL_LOG_FILE
+		: (string) getenv( 'BROUNHALL_LOG_FILE' );
+	$log_file = trim( $log_file );
+	if ( $log_file && 'production' !== brounhall_observability_environment() ) {
+		$directory = dirname( $log_file );
+		if ( ! is_dir( $directory ) && function_exists( 'wp_mkdir_p' ) ) {
+			wp_mkdir_p( $directory );
+		}
+		if ( is_dir( $directory ) && is_writable( $directory ) ) {
+			file_put_contents( $log_file, $output . PHP_EOL, FILE_APPEND | LOCK_EX );
+		}
+	}
 }
