@@ -37,7 +37,7 @@ function brounhall_register_legacy_entity_post_types() {
 				'public'              => 'bh_faq' !== $post_type,
 				'publicly_queryable'  => 'bh_faq' !== $post_type,
 				'show_ui'             => true,
-				'show_in_menu'        => 'bh_doctor' === $post_type ? false : true,
+				'show_in_menu'        => true,
 				'show_in_rest'        => true,
 				'has_archive'         => false,
 				'rewrite'             => false,
@@ -115,7 +115,7 @@ function brounhall_register_doctor_post_type() {
 			),
 			'public'              => true,
 			'show_ui'             => true,
-			'show_in_menu'        => 'edit.php?post_type=bh_doctor',
+			'show_in_menu'        => true,
 			'show_in_rest'        => true,
 			'has_archive'         => false,
 			'rewrite'             => array(
