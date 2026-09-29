@@ -18,7 +18,7 @@ add_filter( 'acf/update_value/key=field_brounhall_doctor_location', 'brounhall_s
  * @param string[] $post_types Post types that should receive the group.
  * @return array<string, mixed>|WP_Error
  */
-function brounhall_doctor_field_group( $post_types = array( 'doctor' ) ) {
+function brounhall_doctor_field_group( $post_types = array( 'doctor', 'bh_doctor' ) ) {
 	if ( ! is_array( $post_types ) || empty( $post_types ) ) {
 		return new WP_Error( 'brounhall_invalid_doctor_post_types', 'Doctor field group post types must be a non-empty array.' );
 	}
@@ -95,7 +95,7 @@ function brounhall_register_doctor_field_group() {
 		return;
 	}
 
-	$field_group = brounhall_doctor_field_group( array( 'doctor' ) );
+	$field_group = brounhall_doctor_field_group( array( 'doctor', 'bh_doctor' ) );
 
 	if ( ! is_wp_error( $field_group ) ) {
 		acf_add_local_field_group( $field_group );
