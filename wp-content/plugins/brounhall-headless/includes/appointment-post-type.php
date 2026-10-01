@@ -5,7 +5,8 @@ add_action( 'init', 'brounhall_register_appointment_post_type' );
 add_action( 'admin_menu', function () {
 	if ( ! current_user_can( 'edit_appointments' ) && ! current_user_can( 'edit_complaints' ) ) return;
 	$parent = 'brounhall-records';
-	add_menu_page( 'Patient Records', 'Patient Records', 'edit_appointments', $parent, function () { wp_safe_redirect( admin_url( 'edit.php?post_type=bh_appointment' ) ); exit; }, 'dashicons-clipboard', 26 );
+	$hook = add_menu_page( 'Patient Records', 'Patient Records', 'edit_appointments', $parent, '__return_empty_string', 'dashicons-clipboard', 26 );
+	add_action( "load-{$hook}", function () { wp_safe_redirect( admin_url( 'edit.php?post_type=bh_appointment' ) ); exit; } );
 	if ( current_user_can( 'edit_appointments' ) ) add_submenu_page( $parent, 'Appointments', 'Appointments', 'edit_appointments', 'edit.php?post_type=bh_appointment' );
 	if ( current_user_can( 'edit_complaints' ) ) add_submenu_page( $parent, 'Patient Complaints', 'Patient Complaints', 'edit_complaints', 'edit.php?post_type=bh_complaint' );
 }, 30 );
