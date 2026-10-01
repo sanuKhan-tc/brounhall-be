@@ -171,6 +171,34 @@ command locally or over SSH after deployment. It uploads the seed file to a
 temporary remote path and removes it after the command completes. Only
 approved Arabic translations should be added to the seed file.
 
+### Bilingual content migration
+
+Use the content command for the repeatable English/Arabic migration. It is
+dry-run by default; `--execute` is required to write. English migrates only
+legacy YAML-backed Pages into the existing `_brounhall_page_data` payload.
+Arabic uses the supplied JSON seed and existing `_ar` records. The command
+updates only those managed content payloads and preserves post IDs, unrelated
+metadata, media references and editor-owned fields.
+
+```bash
+wp brounhall content migrate --locale=en
+wp brounhall content migrate --locale=ar \
+  --file=/path/to/arabic-content.seed.json
+wp brounhall content migrate --locale=all \
+  --file=/path/to/arabic-content.seed.json
+wp brounhall content migrate --locale=all \
+  --file=/path/to/arabic-content.seed.json --execute
+wp brounhall content migrate --locale=all \
+  --file=/path/to/arabic-content.seed.json \
+  --temporary-placeholders --execute
+```
+
+Temporary unresolved fields may use deterministic, locale-specific placeholder
+content while business copy is pending. Placeholder content must never be used
+for medical claims, prices, providers, legal wording, accreditation claims or
+other verified facts. The migration source remains the only repeatable seed
+input; do not import a database dump or copy attachment IDs between systems.
+
 ### Blog content migration
 
 Blogs use native WordPress Posts with managed `_brounhall_blog_data` metadata.

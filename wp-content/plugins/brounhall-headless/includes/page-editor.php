@@ -356,6 +356,14 @@ function brounhall_page_yaml_parse_node( $tokens, &$index, $indent ) {
 			if ( 0 !== strpos( $text, '- ' ) ) break;
 			$rest = trim( substr( $text, 2 ) );
 			$index++;
+			if ( '>' === $rest || '|' === $rest ) {
+				$parts = array();
+				while ( isset( $tokens[ $index ] ) && $tokens[ $index ][0] > $indent ) {
+					$parts[] = trim( $tokens[ $index++ ][1] );
+				}
+				$result[] = '>' === $rest ? implode( ' ', $parts ) : implode( "\n", $parts );
+				continue;
+			}
 			$is_quoted_scalar = strlen( $rest ) > 1 && in_array( $rest[0], array( '"', "'" ), true ) && $rest[0] === substr( $rest, -1 );
 			if ( $is_quoted_scalar ) {
 				$result[] = brounhall_page_yaml_scalar( $rest );
