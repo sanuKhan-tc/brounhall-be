@@ -39,7 +39,93 @@ function brounhall_locale_seed_status( $item ) {
 function brounhall_register_locale_migration_command() {
 	if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( 'WP_CLI' ) ) {
 		WP_CLI::add_command( 'brounhall locale migrate', 'brounhall_locale_migrate_command' );
+		WP_CLI::add_command( 'brounhall content migrate', 'brounhall_content_migrate_command' );
 	}
+}
+
+function brounhall_content_migrate_english( $execute ) {
+	$counts = array( 'updated' => 0, 'unchanged' => 0, 'skipped' => 0 );
+	$pages  = get_posts( array( 'post_type' => 'page', 'post_status' => 'any', 'posts_per_page' => -1 ) );
+	foreach ( $pages as $page ) {
+		if ( '' === trim( (string) $page->post_content ) ) {
+			$counts['skipped']++;
+			continue;
+		}
+		$data = brounhall_page_yaml_to_array( $page->post_content );
+		if ( ! is_array( $data ) || empty( $data['sections'] ) || ! is_array( $data['sections'] ) ) {
+			$counts['skipped']++;
+			continue;
+		}
+		$data['version'] = 1;
+		$next            = wp_json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+		$current         = (string) get_post_meta( $page->ID, BROUNHALL_PAGE_DATA_META, true );
+		if ( $next === wp_unslash( $current ) ) {
+			$counts['unchanged']++;
+			continue;
+		}
+		if ( $execute ) {
+			update_post_meta( $page->ID, BROUNHALL_PAGE_DATA_META, wp_slash( $next ) );
+		}
+		$counts['updated']++;
+	}
+	return $counts;
+}
+
+function brounhall_content_temporary_placeholders( $value, $locale ) {
+	$placeholder = 'ar' === $locale
+		? 'لوريم إيبسوم مؤقت إلى حين اعتماد المحتوى التحريري.'
+		: 'Lorem ipsum placeholder content pending approved editorial copy.';
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $child ) {
+			$value[ $key ] = brounhall_content_temporary_placeholders( $child, $locale );
+		}
+		return $value;
+	}
+	return '>' === $value ? $placeholder : $value;
+}
+
+function brounhall_content_migrate_command( $args, $assoc_args ) {
+	$locale  = $assoc_args['locale'] ?? 'all';
+	$locale  = 'all' === $locale ? 'all' : brounhall_supported_locale( $locale );
+	$execute = ! empty( $assoc_args['execute'] );
+	$temporary_placeholders = ! empty( $assoc_args['temporary-placeholders'] );
+	$counts  = array();
+
+	if ( in_array( $locale, array( 'en', 'all' ), true ) ) {
+		$counts['en_pages'] = brounhall_content_migrate_english( $execute );
+	}
+
+	if ( in_array( $locale, array( 'ar', 'all' ), true ) ) {
+		$file = $assoc_args['file'] ?? '';
+		if ( '' === $file || ! is_readable( $file ) ) {
+			WP_CLI::error( 'Arabic migration requires a readable --file JSON seed document.' );
+		}
+		$data = json_decode( (string) file_get_contents( $file ), true );
+		if ( ! is_array( $data ) ) {
+			WP_CLI::error( 'The content seed document must contain a JSON object.' );
+		}
+		$counts['ar'] = array( 'pages' => array(), 'treatments' => array(), 'doctors' => array() );
+		foreach ( (array) ( $data['pages'] ?? array() ) as $item ) {
+			if ( $temporary_placeholders ) {
+				$item['data'] = brounhall_content_temporary_placeholders( $item['data'] ?? array(), 'ar' );
+			}
+			$result = brounhall_locale_migrate_page( $item, $execute );
+			$counts['ar']['pages'][ $result ] = ( $counts['ar']['pages'][ $result ] ?? 0 ) + 1;
+		}
+		foreach ( (array) ( $data['treatments'] ?? array() ) as $item ) {
+			if ( $temporary_placeholders ) {
+				$item['data'] = brounhall_content_temporary_placeholders( $item['data'] ?? array(), 'ar' );
+			}
+			$result = brounhall_locale_migrate_treatment( $item, $execute );
+			$counts['ar']['treatments'][ $result ] = ( $counts['ar']['treatments'][ $result ] ?? 0 ) + 1;
+		}
+		foreach ( (array) ( $data['doctors'] ?? array() ) as $item ) {
+			$result = brounhall_locale_migrate_doctor( $item, $execute );
+			$counts['ar']['doctors'][ $result ] = ( $counts['ar']['doctors'][ $result ] ?? 0 ) + 1;
+		}
+	}
+
+	WP_CLI::success( ( $execute ? 'Content migration completed. ' : 'Dry run only. Nothing was written. ' ) . wp_json_encode( $counts ) );
 }
 
 function brounhall_locale_seed_file( $path ) {
