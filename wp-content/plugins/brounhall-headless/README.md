@@ -240,9 +240,12 @@ Enable storage only through the environment's `wp-config.php`:
 define( 'BOURNHALL_STORE_FORM_SUBMISSIONS', true );
 ```
 
-When enabled, the Appointment and Patient Complaint admin record views show a
-warning that patient data is being persisted. Do not enable this setting until
-retention, access, backup, and deletion requirements are approved.
+The Appointment and Patient Complaint admin record views always show the
+current storage state. When enabled, they warn that patient data is being
+persisted. When disabled, they explain that new submissions are email-only and
+ask users to contact the system administrator if record storage is required.
+Do not enable this setting until retention, access, backup, and deletion
+requirements are approved.
 
 The `bh_appointment` record type stores submitted appointment requests privately
 in WordPress. The Next.js `/api/appointments` route signs requests with the
