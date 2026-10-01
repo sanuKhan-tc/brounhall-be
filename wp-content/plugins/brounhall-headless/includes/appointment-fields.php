@@ -6,6 +6,7 @@ add_filter( 'manage_bh_appointment_posts_columns', function () { return array( '
 add_action( 'manage_bh_appointment_posts_custom_column', function ( $column, $post_id ) { if ( 'status' === $column ) { $status = get_post_meta( $post_id, '_bh_record_status', true ); echo esc_html( brounhall_record_statuses()[ $status ] ?? 'New' ); } }, 10, 2 );
 
 function brounhall_appointment_meta_box( $post ) {
+	brounhall_form_storage_admin_warning();
 	if ( ! brounhall_pii_access_granted( $post->ID ) ) { brounhall_pii_access_prompt( $post->ID ); return; }
 	$data = brounhall_appointment_get_data( $post->ID, true );
 	if ( is_wp_error( $data ) ) { echo '<p>' . esc_html( $data->get_error_message() ) . '</p>'; return; }
