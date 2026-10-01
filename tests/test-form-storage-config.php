@@ -2,6 +2,7 @@
 declare( strict_types=1 );
 
 define( 'ABSPATH', __DIR__ . DIRECTORY_SEPARATOR );
+function add_action() {}
 require __DIR__ . '/../wp-content/plugins/brounhall-headless/includes/form-mail.php';
 
 if ( brounhall_store_form_submissions() ) {
