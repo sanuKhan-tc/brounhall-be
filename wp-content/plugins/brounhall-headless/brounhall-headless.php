@@ -49,6 +49,7 @@ foreach ( array(
 	'record-workflow.php',
 	'appointment-fields.php',
 	'appointment-settings.php',
+	'form-mail.php',
 	'appointment-rest.php',
 	'complaint-post-type.php',
 	'complaint-rest.php',

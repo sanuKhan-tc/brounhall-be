@@ -23,16 +23,22 @@ function brounhall_create_complaint( WP_REST_Request $request ) {
 	$payload = json_decode( $request->get_body(), true );
 	if ( ! is_array( $payload ) || ! wp_verify_nonce( sanitize_text_field( (string) ( $payload['wpNonce'] ?? '' ) ), 'brounhall_create_complaint' ) ) return new WP_Error( 'brounhall_complaint_nonce_invalid', 'Request rejected', array( 'status' => 403 ) );
 	$data = brounhall_complaint_validate_payload( $payload ); if ( is_wp_error( $data ) ) { brounhall_log( 'warn', 'complaint_validation_failed', 'Complaint validation failed', array( 'request_id' => brounhall_observability_request_id( $request ), 'error_type' => 'validation_failure' ) ); return $data; }
-	$token_key = 'brounhall_complaint_token_' . md5( $data['clientToken'] ); if ( false !== get_transient( $token_key ) ) return rest_ensure_response( array( 'success' => true, 'duplicate' => true ) );
-	set_transient( $token_key, 'processing', 10 * MINUTE_IN_SECONDS );
-	$reference = 'CMP-' . strtoupper( bin2hex( random_bytes( 5 ) ) ); $secure = $data; unset( $secure['clientToken'] );
+	$store = brounhall_store_form_submissions();
+	$token_key = 'brounhall_complaint_token_' . md5( $data['clientToken'] );
+	if ( $store ) { if ( false !== get_transient( $token_key ) ) return rest_ensure_response( array( 'success' => true, 'duplicate' => true ) ); set_transient( $token_key, 'processing', 10 * MINUTE_IN_SECONDS ); }
+	$reference = 'CMP-' . strtoupper( bin2hex( random_bytes( 5 ) ) );
+	if ( ! $store ) {
+		if ( ! brounhall_send_form_notification( 'complaint', $data, $reference ) ) return new WP_Error( 'brounhall_complaint_email_failed', 'Complaint could not be sent', array( 'status' => 503 ) );
+		brounhall_log( 'info', 'complaint_accepted', 'Patient complaint accepted', array( 'request_id' => brounhall_observability_request_id( $request ) ) );
+		return rest_ensure_response( array( 'success' => true ) );
+	}
+	$secure = $data; unset( $secure['clientToken'] );
 	try { $envelope = brounhall_appointment_envelope( $reference, $secure ); } catch ( Throwable $error ) { delete_transient( $token_key ); return new WP_Error( 'brounhall_complaint_crypto_unavailable', 'Complaint could not be secured', array( 'status' => 503 ) ); }
 	$meta = array( '_bh_complaint_ref' => $reference, '_bh_pii_ciphertext' => $envelope['ciphertext'], '_bh_pii_nonce' => $envelope['nonce'], '_bh_pii_salt' => $envelope['salt'], '_bh_wrapped_dek' => $envelope['wrapped_dek'], '_bh_crypto_algorithm' => $envelope['algorithm'], '_bh_crypto_version' => $envelope['crypto_version'], '_bh_kek_id' => $envelope['kek_id'], '_bh_email_blind_index' => $envelope['email_index'], '_bh_email_index_version' => $envelope['email_index_version'], '_bh_phone_blind_index' => $envelope['phone_index'], '_bh_phone_index_version' => $envelope['phone_index_version'] );
 	$post_id = wp_insert_post( array( 'post_type' => 'bh_complaint', 'post_status' => 'private', 'post_title' => $reference, 'meta_input' => $meta ), true );
 	if ( is_wp_error( $post_id ) ) { delete_transient( $token_key ); return new WP_Error( 'brounhall_complaint_failed', 'Complaint could not be saved', array( 'status' => 500 ) ); }
 	set_transient( $token_key, (int) $post_id, 10 * MINUTE_IN_SECONDS );
-	$recipients = preg_split( '/\s+/', (string) get_option( 'brounhall_appointment_recipients', '' ), -1, PREG_SPLIT_NO_EMPTY ); $recipients = array_values( array_filter( $recipients, 'is_email' ) );
-	if ( $recipients && function_exists( 'brounhall_appointment_is_local' ) && ! brounhall_appointment_is_local() ) wp_mail( $recipients, 'New Bourn Hall patient complaint', "A new patient complaint was received.\n\nReference: {$reference}\nReceived: {$data['submittedAt']}\n\nOpen the secured WordPress admin area to view it.", array( 'Content-Type: text/plain; charset=UTF-8' ) );
+	brounhall_send_form_notification( 'complaint', $data, $reference );
 	brounhall_log( 'info', 'complaint_accepted', 'Patient complaint accepted', array( 'request_id' => brounhall_observability_request_id( $request ) ) );
 	return rest_ensure_response( array( 'success' => true ) );
 }

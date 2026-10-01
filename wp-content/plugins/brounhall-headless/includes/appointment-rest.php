@@ -41,19 +41,28 @@ function brounhall_create_appointment( WP_REST_Request $request ) {
 	if ( ! is_array( $payload ) || ! wp_verify_nonce( sanitize_text_field( (string) ( $payload['wpNonce'] ?? '' ) ), 'brounhall_create_appointment' ) ) { return new WP_Error( 'brounhall_appointment_nonce_invalid', 'Request rejected', array( 'status' => 403 ) ); }
 	$data = brounhall_appointment_validate_payload( $payload );
 	if ( is_wp_error( $data ) ) { brounhall_appointment_security_log( 'appointment.validation_failed', $request ); return $data; }
+	$store = brounhall_store_form_submissions();
 	$token_key = 'brounhall_appointment_token_' . md5( $data['clientToken'] );
-	$token_state = get_transient( $token_key );
-	if ( is_numeric( $token_state ) && (int) $token_state > 0 ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return rest_ensure_response( array( 'success' => true, 'duplicate' => true ) ); }
-	if ( false !== $token_state ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return new WP_Error( 'brounhall_appointment_duplicate', 'Request already received', array( 'status' => 409 ) ); }
-	try { $fingerprint = brounhall_appointment_key_provider()->blind_index( 'duplicate', strtolower( $data['email'] ) . '|' . preg_replace( '/\D+/', '', $data['phone'] ) . '|' . $data['location'] . '|' . $data['service'] . '|' . strtolower( $data['message'] ) ); } catch ( Throwable $error ) { return new WP_Error( 'brounhall_appointment_crypto_unavailable', 'Appointment could not be secured', array( 'status' => 503 ) ); }
-	$fingerprint_key = 'brounhall_appointment_fingerprint_' . $fingerprint;
-	if ( false !== get_transient( $fingerprint_key ) ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return new WP_Error( 'brounhall_appointment_duplicate', 'A similar request was recently received', array( 'status' => 409 ) ); }
-	set_transient( $token_key, 'processing', 10 * MINUTE_IN_SECONDS );
-	set_transient( $fingerprint_key, 1, DAY_IN_SECONDS );
+	$fingerprint_key = '';
+	if ( $store ) {
+		$token_state = get_transient( $token_key );
+		if ( is_numeric( $token_state ) && (int) $token_state > 0 ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return rest_ensure_response( array( 'success' => true, 'duplicate' => true ) ); }
+		if ( false !== $token_state ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return new WP_Error( 'brounhall_appointment_duplicate', 'Request already received', array( 'status' => 409 ) ); }
+		try { $fingerprint = brounhall_appointment_key_provider()->blind_index( 'duplicate', strtolower( $data['email'] ) . '|' . preg_replace( '/\D+/', '', $data['phone'] ) . '|' . $data['location'] . '|' . $data['service'] . '|' . strtolower( $data['message'] ) ); } catch ( Throwable $error ) { return new WP_Error( 'brounhall_appointment_crypto_unavailable', 'Appointment could not be secured', array( 'status' => 503 ) ); }
+		$fingerprint_key = 'brounhall_appointment_fingerprint_' . $fingerprint;
+		if ( false !== get_transient( $fingerprint_key ) ) { brounhall_appointment_security_log( 'appointment.duplicate', $request ); return new WP_Error( 'brounhall_appointment_duplicate', 'A similar request was recently received', array( 'status' => 409 ) ); }
+		set_transient( $token_key, 'processing', 10 * MINUTE_IN_SECONDS );
+		set_transient( $fingerprint_key, 1, DAY_IN_SECONDS );
+	}
 	$data['submittedAt'] = current_time( 'mysql' );
 	$reference = brounhall_appointment_reference();
 	$payload = $data;
 	unset( $payload['clientToken'] );
+	if ( ! $store ) {
+		if ( ! brounhall_send_form_notification( 'appointment', $data, $reference ) ) return new WP_Error( 'brounhall_appointment_email_failed', 'Appointment could not be sent', array( 'status' => 503 ) );
+		brounhall_appointment_security_log( 'appointment.accepted', $request );
+		return rest_ensure_response( array( 'success' => true ) );
+	}
 	try { $envelope = brounhall_appointment_envelope( $reference, $payload ); } catch ( Throwable $error ) { delete_transient( $token_key ); delete_transient( $fingerprint_key ); return new WP_Error( 'brounhall_appointment_crypto_unavailable', 'Appointment could not be secured', array( 'status' => 503 ) ); }
 	$meta = array(
 		'_bh_appointment_ref' => $reference, '_bh_appointment_status' => 'new', '_bh_created_at' => current_time( 'mysql' ), '_bh_migration_version' => 1,
@@ -65,13 +74,7 @@ function brounhall_create_appointment( WP_REST_Request $request ) {
 	if ( is_wp_error( $post_id ) ) { delete_transient( $token_key ); delete_transient( $fingerprint_key ); return new WP_Error( 'brounhall_appointment_failed', 'Appointment could not be saved', array( 'status' => 500 ) ); }
 	try { $verified = brounhall_appointment_decrypt( $reference, brounhall_appointment_read_envelope( $post_id ) ); if ( $verified !== $payload ) { throw new RuntimeException( 'Appointment read-back verification failed' ); } } catch ( Throwable $error ) { wp_delete_post( $post_id, true ); delete_transient( $token_key ); delete_transient( $fingerprint_key ); return new WP_Error( 'brounhall_appointment_failed', 'Appointment could not be saved', array( 'status' => 500 ) ); }
 	set_transient( $token_key, (int) $post_id, 10 * MINUTE_IN_SECONDS );
-	$recipients = preg_split( '/\s+/', (string) get_option( 'brounhall_appointment_recipients', '' ), -1, PREG_SPLIT_NO_EMPTY );
-	$recipients = array_values( array_filter( $recipients, 'is_email' ) );
-	if ( $recipients && ! brounhall_appointment_is_local() ) {
-		$subject = 'New Bourn Hall appointment request';
-		$body = "A new appointment request was received.\n\nReference: {$reference}\nReceived: {$data['submittedAt']}\n\nOpen the secured WordPress admin area to view the appointment.";
-		wp_mail( $recipients, $subject, $body, array( 'Content-Type: text/plain; charset=UTF-8' ) );
-	}
+	brounhall_send_form_notification( 'appointment', $data, $reference );
 	brounhall_appointment_security_log( 'appointment.accepted', $request );
 	return rest_ensure_response( array( 'success' => true ) );
 }
