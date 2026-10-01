@@ -226,6 +226,14 @@ scripts, and styles are not accepted.
 
 ## Appointments
 
+Form persistence is opt-in. Define `BOURNHALL_STORE_FORM_SUBMISSIONS` as a
+boolean `true` in `wp-config.php` only when private WordPress appointment and
+complaint records are approved. When the constant is absent or false, the
+validated request is not encrypted or inserted into WordPress; it is sent only
+to the configured notification recipients. Notification subjects include the
+submitted phone number for searchability, and the message uses the Bourn Hall
+HTML email template. Replay and rate-limit controls remain active.
+
 The `bh_appointment` record type stores submitted appointment requests privately
 in WordPress. The Next.js `/api/appointments` route signs requests with the
 server-only `WORDPRESS_APPOINTMENT_API_KEY`; WordPress validates the signature,
