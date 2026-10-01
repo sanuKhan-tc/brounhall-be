@@ -6,8 +6,11 @@ function brounhall_store_form_submissions() {
 }
 
 function brounhall_form_storage_admin_warning() {
-	if ( ! brounhall_store_form_submissions() ) return;
-	echo '<div class="notice notice-warning inline"><p><strong>Warning:</strong> form submission storage is enabled. This record contains persisted patient data in WordPress. Confirm retention, access, and deletion approvals before continuing.</p></div>';
+	if ( brounhall_store_form_submissions() ) {
+		echo '<div class="notice notice-warning inline"><p><strong>Warning:</strong> form submission storage is enabled. This record contains persisted patient data in WordPress. Confirm retention, access, and deletion approvals before continuing.</p></div>';
+		return;
+	}
+	echo '<div class="notice notice-warning inline"><p><strong>Notice:</strong> form submission storage has been disabled by the system administrator. New appointment and complaint submissions are emailed and are not stored in WordPress. Contact the system administrator to enable record storage if required.</p></div>';
 }
 
 function brounhall_form_recipients() {
