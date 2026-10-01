@@ -5,6 +5,11 @@ function brounhall_store_form_submissions() {
 	return defined( 'BOURNHALL_STORE_FORM_SUBMISSIONS' ) && filter_var( BOURNHALL_STORE_FORM_SUBMISSIONS, FILTER_VALIDATE_BOOLEAN );
 }
 
+function brounhall_form_storage_admin_warning() {
+	if ( ! brounhall_store_form_submissions() ) return;
+	echo '<div class="notice notice-warning inline"><p><strong>Warning:</strong> form submission storage is enabled. This record contains persisted patient data in WordPress. Confirm retention, access, and deletion approvals before continuing.</p></div>';
+}
+
 function brounhall_form_recipients() {
 	$recipients = preg_split( '/[\s,;]+/', (string) get_option( 'brounhall_appointment_recipients', '' ), -1, PREG_SPLIT_NO_EMPTY );
 	return array_values( array_filter( $recipients, 'is_email' ) );

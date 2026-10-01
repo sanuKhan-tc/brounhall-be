@@ -20,6 +20,7 @@ function brounhall_complaint_data( $post_id ) {
 	try { return brounhall_appointment_decrypt( get_post_meta( $post_id, '_bh_complaint_ref', true ), brounhall_appointment_read_envelope( $post_id ) ); } catch ( Throwable $error ) { return new WP_Error( 'brounhall_complaint_decrypt_failed', 'Sensitive complaint data could not be decrypted' ); }
 }
 function brounhall_complaint_meta_box( $post ) {
+	brounhall_form_storage_admin_warning();
 	if ( ! brounhall_pii_access_granted( $post->ID ) ) { brounhall_pii_access_prompt( $post->ID ); return; }
 	$data = brounhall_complaint_data( $post->ID );
 	if ( is_wp_error( $data ) ) { echo '<p>' . esc_html( $data->get_error_message() ) . '</p>'; return; }

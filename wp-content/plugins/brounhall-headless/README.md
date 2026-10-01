@@ -234,6 +234,16 @@ to the configured notification recipients. Notification subjects include the
 submitted phone number for searchability, and the message uses the Bourn Hall
 HTML email template. Replay and rate-limit controls remain active.
 
+Enable storage only through the environment's `wp-config.php`:
+
+```php
+define( 'BOURNHALL_STORE_FORM_SUBMISSIONS', true );
+```
+
+When enabled, the Appointment and Patient Complaint admin record views show a
+warning that patient data is being persisted. Do not enable this setting until
+retention, access, backup, and deletion requirements are approved.
+
 The `bh_appointment` record type stores submitted appointment requests privately
 in WordPress. The Next.js `/api/appointments` route signs requests with the
 server-only `WORDPRESS_APPOINTMENT_API_KEY`; WordPress validates the signature,
