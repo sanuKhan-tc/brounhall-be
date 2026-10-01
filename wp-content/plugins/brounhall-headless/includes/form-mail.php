@@ -13,6 +13,12 @@ function brounhall_form_storage_admin_warning() {
 	echo '<div class="notice notice-warning inline"><p><strong>Notice:</strong> form submission storage has been disabled by the system administrator. New appointment and complaint submissions are emailed and are not stored in WordPress. Contact the system administrator to enable record storage if required.</p></div>';
 }
 
+add_action( 'admin_notices', function () {
+	$screen = get_current_screen();
+	if ( ! $screen || 'edit' !== $screen->base || ! in_array( $screen->post_type, array( 'bh_appointment', 'bh_complaint' ), true ) ) return;
+	brounhall_form_storage_admin_warning();
+} );
+
 function brounhall_form_recipients() {
 	$recipients = preg_split( '/[\s,;]+/', (string) get_option( 'brounhall_appointment_recipients', '' ), -1, PREG_SPLIT_NO_EMPTY );
 	return array_values( array_filter( $recipients, 'is_email' ) );
