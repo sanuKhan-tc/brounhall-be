@@ -104,7 +104,7 @@ function brounhall_content_migrate_command( $args, $assoc_args ) {
 		if ( ! is_array( $data ) ) {
 			WP_CLI::error( 'The content seed document must contain a JSON object.' );
 		}
-		$counts['ar'] = array( 'pages' => array(), 'treatments' => array(), 'doctors' => array() );
+		$counts['ar'] = array( 'pages' => array(), 'treatments' => array(), 'doctors' => array(), 'faqs' => array() );
 		foreach ( (array) ( $data['pages'] ?? array() ) as $item ) {
 			if ( $temporary_placeholders ) {
 				$item['data'] = brounhall_content_temporary_placeholders( $item['data'] ?? array(), 'ar' );
@@ -122,6 +122,10 @@ function brounhall_content_migrate_command( $args, $assoc_args ) {
 		foreach ( (array) ( $data['doctors'] ?? array() ) as $item ) {
 			$result = brounhall_locale_migrate_doctor( $item, $execute );
 			$counts['ar']['doctors'][ $result ] = ( $counts['ar']['doctors'][ $result ] ?? 0 ) + 1;
+		}
+		foreach ( (array) ( $data['faqs'] ?? array() ) as $item ) {
+			$result = brounhall_locale_migrate_faq( $item, $execute );
+			$counts['ar']['faqs'][ $result ] = ( $counts['ar']['faqs'][ $result ] ?? 0 ) + 1;
 		}
 	}
 
@@ -177,6 +181,20 @@ function brounhall_locale_migrate_doctor( $item, $execute ) {
 	return 'updated';
 }
 
+function brounhall_locale_migrate_faq( $item, $execute ) {
+	$slug = isset( $item['slug'] ) ? brounhall_localized_slug( $item['slug'], 'ar' ) : '';
+	$title = sanitize_text_field( $item['title'] ?? '' );
+	$answer = sanitize_textarea_field( $item['answer'] ?? '' );
+	if ( '' === $slug || '' === $title || '' === $answer ) return 'skipped';
+	$existing = get_page_by_path( $slug, OBJECT, 'faq' );
+	if ( ! $execute ) return $existing ? 'existing' : 'planned';
+	$post_id = $existing ? $existing->ID : wp_insert_post( array( 'post_type' => 'faq', 'post_status' => brounhall_locale_seed_status( $item ), 'post_title' => $title, 'post_name' => $slug ) );
+	if ( is_wp_error( $post_id ) ) return 'failed';
+	wp_update_post( array( 'ID' => $post_id, 'post_status' => brounhall_locale_seed_status( $item ), 'post_title' => $title, 'post_name' => $slug ) );
+	update_post_meta( $post_id, 'faq_answer', $answer );
+	return $existing ? 'updated' : 'created';
+}
+
 function brounhall_locale_clear_blogs( $execute ) {
 	$posts = get_posts( array( 'post_type' => 'post', 'post_status' => 'any', 'posts_per_page' => -1, 'meta_key' => '_brounhall_blog_data' ) );
 	if ( ! $execute ) return count( $posts );
@@ -201,11 +219,12 @@ function brounhall_locale_migrate_blog( $item, $execute ) {
 function brounhall_locale_migrate_command( $args, $assoc_args ) {
 	$data = brounhall_locale_seed_file( $assoc_args['file'] ?? '' );
 	$execute = ! empty( $assoc_args['execute'] );
-	$counts = array( 'pages' => array(), 'treatments' => array(), 'doctors' => array(), 'blogs' => array() );
+	$counts = array( 'pages' => array(), 'treatments' => array(), 'doctors' => array(), 'faqs' => array(), 'blogs' => array() );
 	if ( ! empty( $assoc_args['replace'] ) && ! empty( $data['blogs'] ) ) $counts['blogs']['cleared'] = brounhall_locale_clear_blogs( $execute );
 	foreach ( (array) ( $data['pages'] ?? array() ) as $item ) { $result = brounhall_locale_migrate_page( $item, $execute ); $counts['pages'][ $result ] = ( $counts['pages'][ $result ] ?? 0 ) + 1; }
 	foreach ( (array) ( $data['treatments'] ?? array() ) as $item ) { $result = brounhall_locale_migrate_treatment( $item, $execute ); $counts['treatments'][ $result ] = ( $counts['treatments'][ $result ] ?? 0 ) + 1; }
 	foreach ( (array) ( $data['doctors'] ?? array() ) as $item ) { $result = brounhall_locale_migrate_doctor( $item, $execute ); $counts['doctors'][ $result ] = ( $counts['doctors'][ $result ] ?? 0 ) + 1; }
+	foreach ( (array) ( $data['faqs'] ?? array() ) as $item ) { $result = brounhall_locale_migrate_faq( $item, $execute ); $counts['faqs'][ $result ] = ( $counts['faqs'][ $result ] ?? 0 ) + 1; }
 	foreach ( (array) ( $data['blogs'] ?? array() ) as $item ) { $result = brounhall_locale_migrate_blog( $item, $execute ); $counts['blogs'][ $result ] = ( $counts['blogs'][ $result ] ?? 0 ) + 1; }
 	WP_CLI::success( ( $execute ? 'Arabic migration completed. ' : 'Dry run only. Nothing was written. ' ) . wp_json_encode( $counts ) );
 }

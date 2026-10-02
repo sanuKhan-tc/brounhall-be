@@ -99,8 +99,13 @@ function brounhall_rest_clinic( WP_REST_Request $request ) {
 	return rest_ensure_response( brounhall_rest_clinic_data( $post ) );
 }
 
-function brounhall_rest_faq() {
+function brounhall_rest_faq( $request = null ) {
 	$query = new WP_Query( array( 'post_type' => 'faq', 'post_status' => 'publish', 'posts_per_page' => 100, 'orderby' => array( 'menu_order' => 'ASC', 'title' => 'ASC' ), 'no_found_rows' => true ) );
-	$items = array_map( function ( $post ) { return array( 'question' => get_the_title( $post ), 'answer' => (string) get_post_meta( $post->ID, 'faq_answer', true ) ); }, $query->posts );
-	return rest_ensure_response( array( 'id' => $query->posts ? (int) $query->posts[0]->ID : 1, 'slug' => 'faq', 'title' => 'Frequently Asked Questions', 'help' => array( 'body' => '', 'cta' => array( 'label' => '', 'href' => '' ) ), 'categories' => array(), 'items' => $items ) );
+	$locale = function_exists( 'brounhall_request_locale' ) ? brounhall_request_locale( $request ) : 'en';
+	$posts = array_values( array_filter( $query->posts, function ( $post ) use ( $locale ) {
+		$is_arabic = (bool) preg_match( '/_ar$/', $post->post_name );
+		return 'ar' === $locale ? $is_arabic : ! $is_arabic;
+	} ) );
+	$items = array_map( function ( $post ) { return array( 'question' => get_the_title( $post ), 'answer' => (string) get_post_meta( $post->ID, 'faq_answer', true ) ); }, $posts );
+	return rest_ensure_response( array( 'id' => $posts ? (int) $posts[0]->ID : 1, 'slug' => 'faq', 'title' => 'Frequently Asked Questions', 'help' => array( 'body' => '', 'cta' => array( 'label' => '', 'href' => '' ) ), 'categories' => array(), 'items' => $items ) );
 }
