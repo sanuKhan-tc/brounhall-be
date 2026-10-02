@@ -199,6 +199,33 @@ for medical claims, prices, providers, legal wording, accreditation claims or
 other verified facts. The migration source remains the only repeatable seed
 input; do not import a database dump or copy attachment IDs between systems.
 
+The managed Arabic treatment pages currently include:
+
+- `assisted-reproduction_ar` — Assisted Reproduction category content and cards.
+- `male-fertility_ar` — Male Fertility hero, causes, assessment, and support copy.
+
+The repository seed for these records is `tools/arabic-content.seed.json`.
+Run a dry-run first, then apply the reviewed seed through the repository
+wrapper:
+
+```powershell
+powershell -File tools/content-migrate.ps1 `
+  -SeedFile tools/arabic-content.seed.json `
+  -Target remote `
+  -SshKey $env:USERPROFILE\.ssh\wpe_brounhall_deploy
+
+powershell -File tools/content-migrate.ps1 `
+  -SeedFile tools/arabic-content.seed.json `
+  -Target remote `
+  -Execute `
+  -SshKey $env:USERPROFILE\.ssh\wpe_brounhall_deploy
+```
+
+The migration is idempotent, updates only managed payloads, and preserves
+English records. The frontend reads the updated records server-side; allow its
+configured cache window to expire before checking the public page. Targeted
+frontend revalidation is not currently wired to WordPress.
+
 ### Blog content migration
 
 Blogs use native WordPress Posts with managed `_brounhall_blog_data` metadata.
