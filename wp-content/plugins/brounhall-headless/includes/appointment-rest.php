@@ -42,6 +42,9 @@ function brounhall_create_appointment( WP_REST_Request $request ) {
 	$data = brounhall_appointment_validate_payload( $payload );
 	if ( is_wp_error( $data ) ) { brounhall_appointment_security_log( 'appointment.validation_failed', $request ); return $data; }
 	$store = brounhall_store_form_submissions();
+	if ( $store && ! function_exists( 'sodium_crypto_aead_xchacha20poly1305_ietf_encrypt' ) ) {
+		return new WP_Error( 'brounhall_appointment_crypto_unavailable', 'Appointment storage is not configured', array( 'status' => 503 ) );
+	}
 	$token_key = 'brounhall_appointment_token_' . md5( $data['clientToken'] );
 	$fingerprint_key = '';
 	if ( $store ) {
