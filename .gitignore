@@ -1,5 +1,19 @@
-wp-content/uploads/
+# The local XAMPP installation is kept on disk but is not versioned.
+/wp-admin/
+/wp-includes/
+/wp-content/*
+!/wp-content/
+!/wp-content/plugins/
+/wp-content/plugins/*
+!/wp-content/plugins/brounhall-headless/
+!/wp-content/plugins/brounhall-headless/**
+/*.php
+/*.txt
+/*.html
+/.htaccess
+
+# Runtime and developer-local files.
+/wp-content/uploads/
 wp-config.php
 .env
-.htaccess 
 tools/generate-pii-code.php
